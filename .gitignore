@@ -162,3 +162,4 @@ cython_debug/
 .vscode
 # DDLC MOD STUFF
 Mod
+test.py

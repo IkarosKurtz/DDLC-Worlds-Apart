@@ -1,7 +1,13 @@
 from src.character_logging import CustomLogger
 from character_data import CharacterDetails
 from agent_memory_manager import AgentMemoryManager
-from .agent_memory.memory_stream import MemoryStream
+from .agent_memory.agent_memory import AgentMemory
+from dotenv import load_dotenv
+import os
+import openai
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI")
 
 class Character:
   def __init__(self, name: str, bio: str, habilites: str, memories: str, traits: str) -> None:
@@ -21,4 +27,4 @@ class Character:
     
     memories = [memory.strip() for memory in memories.split(';')]
     
-    self._memory_stream = MemoryStream(memories, self._personal_data, self._character_logger, self._database)
+    self._memory_stream = AgentMemory(memories, self._personal_data, self._character_logger, self._database)

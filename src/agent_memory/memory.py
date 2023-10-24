@@ -10,7 +10,7 @@ class MemoryKind(Enum):
     REFLECTION = 1
 
 
-class Memory:
+class MemoryEntry:
     def __init__(self, description: str, importance: float, kind: MemoryKind, **attributes) -> None:
         self.description = description
         self.importance = importance
@@ -21,8 +21,8 @@ class Memory:
             'created_at': datetime.datetime.now(),
             'accessed_at': datetime.datetime.now(),
             'retrieval_value': 0,
-            'embedding': get_embedding(description, engine='text-embedding-ada-002'),
-            'references': []
+            'embedding': attributes.get('embedding', get_embedding(description, engine='text-embedding-ada-002')),
+            'associated_memories': []
         }
         
         for attribute, default in defaults.items():
@@ -53,8 +53,8 @@ class Memory:
         return self._embedding
 
     @property
-    def references(self) -> list[str]:
-        return self._references
+    def associated_memories(self) -> list[str]:
+        return self._associated_memories
 
     def access(self) -> None:
         """Update the last accessed time."""
@@ -76,7 +76,7 @@ class Memory:
             'description': self.description,
             'retrieval_value': self._retrieval_value,
             'importance': self.importance,
-            'references': self._references,
+            'associated_memories': self._associated_memories,
             'created_at': self._created_at,
             'accessed_at': self._accessed_at,
             'embedding': self._embedding
