@@ -2,6 +2,7 @@ from src.character_logging import CustomLogger
 from character_data import CharacterDetails
 from agent_memory_manager import AgentMemoryManager
 from .agent_memory.agent_memory import AgentMemory
+import time
 from dotenv import load_dotenv
 import os
 import openai
@@ -21,10 +22,18 @@ class Character:
     else:
       self._status = saved_status    
     
-    self._personal_data = CharacterDetails(name, bio, traits, habilites, saved_status, 'chat')
+    self._personal_data = CharacterDetails(name, bio, traits, habilites, saved_status, 'club room')
     
     self._character_logger = CustomLogger(self._personal_data)
     
     memories = [memory.strip() for memory in memories.split(';')]
     
-    self._memory_stream = AgentMemory(memories, self._personal_data, self._character_logger, self._database)
+    self._conversation_history = []
+
+    initial_time = time.time()
+        
+    self._agent_memory = AgentMemory(memories, self._personal_data, self._character_logger, self._database)
+    
+    
+    
+    
