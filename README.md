@@ -2,7 +2,7 @@
 
 Immerse yourself in an unparalleled dialogue experience with the members of the Literature Club. DDLC AI extends beyond pre-scripted responses, introducing fluid, generative, and memory-rich interactions.
 
-![DDLC AI Banner](path-to-your-banner-image-if-you-have-one.png)
+![DDLC AI Banner](./static/placeholder.png)
 
 ## Table of Contents
 
