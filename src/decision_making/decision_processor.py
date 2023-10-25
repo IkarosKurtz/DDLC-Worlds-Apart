@@ -101,7 +101,7 @@ class DecisionProcessor:
     
     return summaries
 
-  def generate_possible_agent_action(self, observation: str, memory_summaries: list[str]) -> str:
+  def determine_possible_action(self, observation: str, memory_summaries: list[str]) -> str:
     self._logger.agent_info('Generating possible agent action...')
     
     prompt = textwrap.dedent("""
