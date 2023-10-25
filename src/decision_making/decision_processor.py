@@ -3,6 +3,7 @@ from ..character_data import CharacterDetails
 from ..character_logging import CustomLogger
 from ..openai_helpers.chat_completion import chat_completion
 from .thread_decorator import create_thread
+
 import textwrap
 import datetime
 
@@ -31,7 +32,7 @@ class DecisionProcessor:
     Action: <FILL IN>
     """).format(speaker, self._character_data.name, f'{speaker}: {speaker_message}', speaker)
 
-    speaker_action, _ = chat_completion('You are a helpful assistant.', prompt)
+    speaker_action, _ = chat_completion(prompt)
 
     speaker_action = speaker_action.split(':')[1].strip()
 
@@ -57,7 +58,7 @@ class DecisionProcessor:
     Observation: <FILL IN>
     """).format(speaker, self._character_data.name, conversation, self._character_data.location)
 
-    observation, _ = chat_completion('You are a helpful assistant.', prompt)
+    observation, _ = chat_completion(prompt)
 
     observation = observation.split(':')[1].strip()
 
@@ -86,7 +87,7 @@ class DecisionProcessor:
     def wrap(question: str) -> None:
       memories_retrieved = self._agent_memory.retrieve(question)
       memories_descriptions = '\n'.join([f'{i + 1}. {memory.access()}' for i, memory in enumerate(memories_retrieved)])
-      summary, _ = chat_completion('You are a helpful assistant.', prompt.format(memories_descriptions))
+      summary, _ = chat_completion(prompt.format(memories_descriptions))
       normalized_summary = summary.split(':')[1].strip()
 
       self._logger.agent_info(f'Generated memory summary: {normalized_summary}')
@@ -135,7 +136,7 @@ class DecisionProcessor:
     self._character_data.name
     )
 
-    possible_action, _ = chat_completion(self._character_data.description, prompt)
+    possible_action, _ = chat_completion(prompt, self._character_data.description)
 
     possible_action = self._prev_possible_action = possible_action.split(':')[1].strip()
 

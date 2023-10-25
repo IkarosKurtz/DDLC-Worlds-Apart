@@ -1,5 +1,6 @@
-import logging
 from character_data import CharacterDetails
+
+import logging
 
 class CustomLogger:
     LOG_FORMAT = '[%(levelname)s]: %(message)s - %(asctime)s'

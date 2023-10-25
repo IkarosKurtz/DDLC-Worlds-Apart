@@ -1,9 +1,9 @@
 from enum import Enum
+from openai.embeddings_utils import get_embedding
+
 import datetime
 import math
 import uuid
-from openai.embeddings_utils import get_embedding
-
 
 class MemoryKind(Enum):
     OBSERVATION = 0

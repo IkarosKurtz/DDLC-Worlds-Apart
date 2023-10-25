@@ -1,9 +1,10 @@
 from ..character_data import CharacterDetails
-from .memory import Memory, MemoryKind
+from .memory import MemoryEntry, MemoryKind
 from ..character_logging import CustomLogger
 from ..agent_memory_manager import AgentMemoryManager
-import textwrap
 from ..openai_helpers.chat_completion import chat_completion
+
+import textwrap
 
 class AgentMemory:
     """ Manages the agent's memory stream. """
@@ -13,7 +14,7 @@ class AgentMemory:
         self._logger = logger
         self._memory_db = memory_db
         
-        self._all_memories: list[Memory] = []
+        self._all_memories: list[MemoryEntry] = []
         self._is_initial_run: bool = True
         
         self._logger.agent_info("Initializing memories")
@@ -28,10 +29,13 @@ class AgentMemory:
             self._logger.memory_info(f"Memory: {memory_desc} already exists in the database")
         
         for stored_memory in self._memory_db.retrieve_all_memories():
-            self._all_memories.append(Memory(**stored_memory))
+            self._all_memories.append(MemoryEntry(**stored_memory))
   
     @property
-    def memories(self) -> list[Memory]:
+    def memories(self) -> list[MemoryEntry]:
+        """ All memories sorted by most recent. """
+        self._all_memories.sort(key=lambda memory: memory.created_at.timestamp(), reverse=True)
+        
         return self._all_memories
   
     def record_memory(self, description: str, memory_kind: MemoryKind = MemoryKind.OBSERVATION, associated_memories: list[str] = None) -> None:
@@ -51,12 +55,12 @@ class AgentMemory:
         Rating: [<FILL IN>]
         """).format(description.strip())
         
-        importance, _ = chat_completion(self._character_data.description, prompt)
+        importance, _ = chat_completion(prompt, self._character_data.description)
         importance = importance.split(':')[1].strip()
         
         self._logger.agent_info(f"Memory '{description}' was given a weight of {importance}")
         
-        new_memory = Memory(description, importance, memory_kind, associated_memories=associated_memories)
+        new_memory = MemoryEntry(description, importance, memory_kind, associated_memories=associated_memories)
         
         self._memory_db.store_memory(new_memory.as_dict())
         

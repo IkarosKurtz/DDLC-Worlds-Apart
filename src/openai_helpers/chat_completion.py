@@ -1,13 +1,7 @@
-import os
-from dotenv import load_dotenv
-import openai
 from openai.error import ServiceUnavailableError
-import time
-load_dotenv()
+import openai
 
-openai.api_key = os.getenv('OPENAI')
-
-def chat_completion(ai_role: str, prompt: str) -> tuple[str]:
+def chat_completion(prompt: str, ai_role: str = 'You are a helpful assistant.', ) -> tuple[str]:
   response = None
 
   while response == None:
