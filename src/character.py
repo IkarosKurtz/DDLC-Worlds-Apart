@@ -4,12 +4,15 @@ from agent_memory_manager import AgentMemoryManager
 from .agent_memory.agent_memory import AgentMemory
 from .agent_memory.generative_memory import GenerativeAgentMemory
 from .agent_memory.memory import MemoryEntry
+from .decision_making.mood_analyzer import MoodAnalyzer
+from .decision_making.decision_processor import DecisionProcessor
 from .decision_making.thread_decorator import create_thread
 from .openai_helpers.chat_completion import chat_completion
 from dotenv import load_dotenv
 
 import time
 import threading
+import datetime
 import textwrap
 import os
 import openai
@@ -22,39 +25,41 @@ class Character:
     self._memory_db = AgentMemoryManager(name, 'json')
 
     saved_status = self._memory_db.get_agent_status()
-    
+
     if saved_status is None:
-      saved_status  = self._generate_status() 
-    
+      saved_status  = self._generate_status()
+
     self._character_data = CharacterDetails(name, bio, traits, habilites, saved_status, 'club room')
-    
+
     self._logger = CustomLogger(self._personal_data)
-    
+
+    self._mood_analyzer = MoodAnalyzer(self._character_data, self._logger)
+
+    self._decision_processor = DecisionProcessor(self._logger, self._agent_memory, self._character_data)
+
     memories = [memory.strip() for memory in memories.split(';')]
-    
+
     self._conversation_history = []
 
     initial_time = time.time()
-        
+
     self._agent_memory = AgentMemory(memories, self._character_data, self._logger, self._memory_db)
-    
+
     self._generative_memory = GenerativeAgentMemory(self._character_data, self._agent_memory, self._logger)
-  
+
     self._character_data.bio = self._generate_bio()
-    
-    # Program a way to update the status every 5 minutes
-    
+
     self._generate_bio_thread = threading.Thread(target=self._generate_bio, daemon=True, name='Generate Bio Thread')
-    
+
     if self._agent_memory._is_initial_run:
       self._generative_memory.generate_reflections()
-      
+
     self._logger.agent_info(f'Finished initializing character in {time.time() - initial_time} seconds')
-    
+
   @property
   def character_data(self) -> CharacterDetails:
     return self._character_data
-  
+
   @property
   def memories(self) -> list[MemoryEntry]:
     return self._agent_memory.memories
@@ -153,3 +158,95 @@ class Character:
     self._memory_db.set_agent_status(new_status)
 
     return new_status
+  
+  def chat(self, speaker: str, message: str) -> str:
+    initial_time = time.time()
+
+    print(len(self._agent_memory.memories))
+    if len(self._agent_memory.memories) % 40 == 0:
+      self._generate_bio_thread.start()
+      
+    self._conversation_history += f'{speaker}: {message.strip()}\n'
+    
+    mood = None
+
+    @create_thread
+    def generate_speaker_action(speaker: str, speaker_message: str) -> str:
+      return self._decision_processor.determine_speaker_action(speaker, speaker_message)
+          
+    @create_thread
+    def generate_observation(speaker: str, conversation_history: str) -> str:
+      return self._decision_processor.generate_observation(speaker, conversation_history)
+
+    speaker_action = generate_speaker_action(speaker, message)
+    observation = generate_observation(speaker, self._conversation_history)
+    
+    speaker_action: str = speaker_action.result()
+    observation: str = observation.result()
+
+    questions = [f'Qué relación tienen {self._personal_data.name} y {speaker}?', speaker_action]
+    
+    memory_summaries = self._decision_processor.generate_memory_summaries(questions)
+    
+    posible_action = self._decision_processor.determine_possible_action(observation, memory_summaries)
+
+    self._logger.agent_info(f'Generating response...')
+
+    final_prompt = textwrap.dedent("""
+    Fecha actual: {}
+    Estado de {}: {}
+    Ubicación actual: {}
+
+    Observación:
+    {}
+
+    Resumen de {} y la relación con {}:
+    {}
+
+    Posible acción a realizar:
+    {}
+    
+    Qué debería de decir {}? Recuerda utilizar solo la información que se te ha dado. Responde en ingles.
+
+    A continuación el historial de la conversación hasta el momento:
+    {}
+    
+    Formato:
+    Respuesta: <FILL IN>
+    """)
+
+    prompt = final_prompt.format(
+      datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+      self.character_data.name,
+      self.character_data.status,
+      self.character_data.position,
+      observation,
+      self.character_data.name,
+      speaker,
+      '\n\n'.join([summary for summary in memory_summaries]),
+      posible_action,
+      self.character_data.name,
+      self._conversation_history
+    )
+
+    self._logger.agent_info(f'Generated prompt: {prompt}')
+    
+    response, tokens = chat_completion(self.character_data.description, prompt)
+    response = response[response.find(':') + 1:].strip()
+    response = response.replace("\"", "")
+
+    self._logger.agent_info(f'Generated response: {response} \nTokens: {tokens}')
+      
+    self._conversation_history += f'{self._personal_data.name}: {response}\n'
+    
+    self._pose = self._mood_analyzer.determine_pose(response)
+    
+    if tokens > 3000:
+      self._conversation_history = ''
+      self._generative_memory.generate_reflections()
+
+    self._agent_memory.record_memory(observation)
+
+    self._logger.agent_info(f'Finished generating response in {time.time() - initial_time} seconds')
+
+    return (response, mood)
