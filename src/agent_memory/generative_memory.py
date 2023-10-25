@@ -62,9 +62,9 @@ class GenerativeAgentMemory:
     1. <Insight>. /*/ References: [<FILL IN>]
     2. <Insight>. /*/ References: [<FILL IN>]
     3. <Insight>. /*/ References: [<FILL IN>]
-    """)
+    """).format(self._character_data.name, formatted_memories)
 
-    insights, _ = chat_completion(prompt.format(self._character_data.name, formatted_memories), 'Eres un asistente util y haces lo que te piden al pie de la letra.')
+    insights, _ = chat_completion(prompt)
 
     new_reflections = []
     for insight in insights.strip().split('\n'):

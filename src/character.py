@@ -137,15 +137,15 @@ class Character:
     list_of_memories = '\n'.join([f'{i + 1}. {memory.access()}' for i, memory in enumerate(recent_memories)])
 
     prompt = textwrap.dedent("""
-    Información (Records):
+    Information (Records):
     {}
 
-    ¿Cual seria el estado emocional actual de {} dadas las afirmaciones de arriba?
-    Utiliza como máximo 10 palabras y de forma OBLIGATORIA utiliza el formato de abajo.
-                            
-    El resultado debe estar en 3ra persona aclarando quien es la persona a la que se refiere.
+    What would be the current emotional state of {} based on the statements above?
+    Use a maximum of 10 words and follow the format below.
 
-    Formato:
+    The result should be in the third person, specifying who the person being referred to is.
+
+    Format:
     Status: <FILL IN>
     """).format(list_of_memories, self._character_data.name)
 
@@ -192,46 +192,44 @@ class Character:
 
     self._logger.agent_info(f'Generating response...')
 
-    final_prompt = textwrap.dedent("""
-    Fecha actual: {}
-    Estado de {}: {}
-    Ubicación actual: {}
+    prompt =textwrap.dedent("""
+    Current Date: {}
+    {}'s State: {}
+    Current Location: {}
 
-    Observación:
+    Observation:
     {}
 
-    Resumen de {} y la relación con {}:
+    Summary of {} and their relationship with {}:
     {}
 
-    Posible acción a realizar:
-    {}
-    
-    Qué debería de decir {}? Recuerda utilizar solo la información que se te ha dado. Responde en ingles.
-
-    A continuación el historial de la conversación hasta el momento:
+    Possible action to take:
     {}
     
-    Formato:
-    Respuesta: <FILL IN>
-    """)
+    What should {} say? Remember to use only the information provided to you. Respond in English.
 
-    prompt = final_prompt.format(
+    Below is the conversation history up to this point:
+    {}
+    
+    Format:
+    Response: <FILL IN>
+    """).format(
       datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-      self.character_data.name,
-      self.character_data.status,
-      self.character_data.position,
+      self._character_data.name,
+      self._character_data.status,
+      self._character_data.position,
       observation,
-      self.character_data.name,
+      self._character_data.name,
       speaker,
       '\n\n'.join([summary for summary in memory_summaries]),
       posible_action,
-      self.character_data.name,
+      self._character_data.name,
       self._conversation_history
     )
 
     self._logger.agent_info(f'Generated prompt: {prompt}')
     
-    response, tokens = chat_completion(self.character_data.description, prompt)
+    response, tokens = chat_completion(prompt, self._character_data.description)
     response = response[response.find(':') + 1:].strip()
     response = response.replace("\"", "")
 

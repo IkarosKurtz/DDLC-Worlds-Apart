@@ -46,7 +46,7 @@ class MoodAnalyzer:
     
     self._log_handler.agent_info('Determining pose...')
     
-    user_prompt = textwrap.dedent("""
+    prompt = textwrap.dedent("""
     My message:
     {}
 
@@ -71,7 +71,7 @@ class MoodAnalyzer:
       pose_list
     )
     
-    response, _ = chat_completion('You are a helpful assistant', user_prompt)
+    response, _ = chat_completion(prompt)
     chosen_state = response.split(":")[1].strip()
     
     chosen_mood = chosen_state.split("/*/")[0].strip()
