@@ -39,7 +39,7 @@ class MoodAnalyzer:
       'rhip': 'right arm on hip',
     }
     
-  def determine_pose(self, message: str) -> tuple[str, str]:  
+  def determine_pose(self, message: str) -> str:  
     mood_list = '\n'.join([f'{key}: {value}' for key, value in self.available_moods.items()])
     
     pose_list = '\n'.join([f'{key}: {value}' for key, value in self.arm_positions.items()])
@@ -79,4 +79,4 @@ class MoodAnalyzer:
     
     self._log_handler.agent_info(f'Determined pose: {chosen_pose}')
     
-    return (chosen_mood, chosen_pose)
+    return f'{chosen_mood} {chosen_pose}'

@@ -163,3 +163,7 @@ cython_debug/
 # DDLC MOD STUFF
 Mod
 test.py
+data.py
+ai.py
+logs
+*.json

@@ -1,4 +1,4 @@
-from character_data import CharacterDetails
+from .character_data import CharacterDetails
 
 import logging
 import os
@@ -18,7 +18,7 @@ class CustomLogger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     
-    console_handler = self._create_handler(logging.StreamHandler(), logging.WARNING)
+    console_handler = self._create_handler(logging.StreamHandler(), logging.INFO)
     file_handler = self._create_handler(logging.FileHandler(log_file), logging.INFO)
     
     logger.addHandler(console_handler)

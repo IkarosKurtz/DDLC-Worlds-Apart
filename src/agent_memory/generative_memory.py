@@ -1,5 +1,5 @@
 from ..openai_helpers.chat_completion import chat_completion
-from ..decision_making.thread_decorator import create_thread
+from ..decision_making.thread_decorator import threaded
 from ..agent_memory.agent_memory import AgentMemory
 from ..character_data import CharacterDetails
 from ..character_logging import CustomLogger
@@ -42,7 +42,7 @@ class GenerativeAgentMemory:
 
     return formatted_questions
 
-  @create_thread
+  @threaded
   def _generate_reflection(self, memory_query: str) -> list[dict]:
     normalized_query = memory_query.strip()
     memories = self._agent_memory.retrieve(normalized_query)
@@ -75,20 +75,27 @@ class GenerativeAgentMemory:
 
     return new_reflections
 
-  @create_thread
-  def _save_memory(self, memory: dict) -> None:
+  @threaded
+  def _save_memory(self, memory: dict) -> int:
     try:
       self._agent_memory.record_memory(memory['description'], MemoryKind.REFLECTION, memory['references'])
     except Exception as e:
       self._logger.agent_error(f'Error saving memory: {e}')
+      
+    return 0 
 
   def generate_reflections(self) -> None:
     self._logger.agent_info('Generating reflections...')
     memories_querys = self._create_query_questions()
 
     threads = [self._generate_reflection(memory_query) for memory_query in memories_querys]
-    reflections = [thread.result() for thread in threads]
+    reflections = [thread for thread in threads]
+    
+    save_threads = []
     
     for reflection in reflections:
       for memory in reflection:
-        self._save_memory(memory)
+        save_threads.append(self._save_memory(memory))
+        
+    for thread in save_threads:
+      res = thread

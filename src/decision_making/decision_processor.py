@@ -2,7 +2,7 @@ from ..agent_memory.agent_memory import AgentMemory
 from ..character_data import CharacterDetails
 from ..character_logging import CustomLogger
 from ..openai_helpers.chat_completion import chat_completion
-from .thread_decorator import create_thread
+from .thread_decorator import threaded
 
 import textwrap
 import datetime
@@ -56,7 +56,7 @@ class DecisionProcessor:
 
     Format:
     Observation: <FILL IN>
-    """).format(speaker, self._character_data.name, conversation, self._character_data.location)
+    """).format(speaker, self._character_data.name, conversation, self._character_data.position)
 
     observation, _ = chat_completion(prompt)
 
@@ -83,7 +83,7 @@ class DecisionProcessor:
 
     summaries = []
 
-    @create_thread
+    @threaded
     def wrap(question: str) -> None:
       memories_retrieved = self._agent_memory.retrieve(question)
       memories_descriptions = '\n'.join([f'{i + 1}. {memory.access()}' for i, memory in enumerate(memories_retrieved)])
@@ -93,11 +93,12 @@ class DecisionProcessor:
       self._logger.agent_info(f'Generated memory summary: {normalized_summary}')
 
       summaries.append(normalized_summary)
+      return 0
         
     threads = [wrap(question) for question in questions]
         
     for thread in threads:
-      thread.result()
+      res = thread
     
     return summaries
 
@@ -125,18 +126,18 @@ class DecisionProcessor:
     Action: <FILL IN>
     """).format(
     self._character_data.name,
-    self._character_data.description,
+    self._character_data.bio,
     datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     self._character_data.name,
     self._character_data.status,
-    self._character_data.location,
+    self._character_data.position,
     observation,
     self._character_data.name,
     '\n\n'.join([f'{summary}' for summary in memory_summaries]),
     self._character_data.name
     )
 
-    possible_action, _ = chat_completion(prompt, self._character_data.description)
+    possible_action, _ = chat_completion(prompt, self._character_data.bio)
 
     possible_action = self._prev_possible_action = possible_action.split(':')[1].strip()
 

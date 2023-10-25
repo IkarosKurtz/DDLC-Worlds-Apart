@@ -12,8 +12,8 @@ class MemoryKind(Enum):
 
 class MemoryEntry:
   def __init__(self, description: str, importance: float, kind: MemoryKind, **attributes) -> None:
-    self.description = description
-    self.importance = importance
+    self._description = description
+    self._importance = importance
     self.kind = kind
     
     defaults = {
@@ -31,6 +31,14 @@ class MemoryEntry:
   @property
   def id(self) -> str:
     return self._id
+  
+  @property
+  def description(self) -> str:
+    return self._description
+  
+  @property
+  def importance(self) -> float:
+    return self._importance
 
   @property
   def created_at(self) -> datetime.datetime:
@@ -56,9 +64,10 @@ class MemoryEntry:
   def associated_memories(self) -> list[str]:
     return self._associated_memories
 
-  def access(self) -> None:
-    """Update the last accessed time."""
+  def access(self) -> str:
     self._accessed_at = datetime.datetime.now()
+    
+    return self._description
 
   def calculate_recency(self) -> float:
     """Calculate recency of memory based on time since last access."""

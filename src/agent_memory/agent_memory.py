@@ -45,21 +45,21 @@ class AgentMemory:
     
     prompt = textwrap.dedent("""
     On a scale from 1 to 10, where 1 is purely mundane (e.g. brushing teeth, making bed, walking the usual route)
-    and 10 is impactful (e.g., a breakup, college acceptance), rate the potential significance of the following memory.
+    and 10 is impactful (e.g., a breakup, college acceptance), rate the potential significance of the following memory. Only use integers.
 
     Memory:
     {}
-
-    STRICTLY follow the given format below; provide only a single integer.
 
     Format:
     Rating: [<FILL IN>]
     """).format(description.strip())
     
-    importance, _ = chat_completion(prompt, self._character_data.description)
+    importance, _ = chat_completion(prompt, self._character_data.bio)
     importance = importance.split(':')[1].strip()
     
-    self._logger.agent_info(f"Memory '{description}' was given a weight of {importance}")
+    self._logger.agent_info(f"Memory > '{description}' > was given a weight of > {importance}")
+    
+    importance = float(importance)
     
     new_memory = MemoryEntry(description, importance, memory_kind, associated_memories=associated_memories)
     
