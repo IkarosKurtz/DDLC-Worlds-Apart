@@ -3,8 +3,7 @@ from ..decision_making.thread_decorator import create_thread
 from ..agent_memory.agent_memory import AgentMemory
 from ..character_data import CharacterDetails
 from ..character_logging import CustomLogger
-from ..agent_memory.memory import MemoryEntry, MemoryKind
-from openai.embeddings_utils import get_embedding, cosine_similarity
+from ..agent_memory.memory import MemoryKind
 
 import textwrap
 import re
@@ -46,7 +45,7 @@ class GenerativeAgentMemory:
   @create_thread
   def _generate_reflection(self, memory_query: str) -> list[dict]:
     normalized_query = memory_query.strip()
-    memories = self.retrieve(normalized_query)
+    memories = self._agent_memory.retrieve(normalized_query)
     formatted_memories = '\n'.join([f'{i + 1}. {memory.access()}' for i, memory in enumerate(memories)])
 
     prompt = textwrap.dedent("""
@@ -87,28 +86,9 @@ class GenerativeAgentMemory:
     self._logger.agent_info('Generating reflections...')
     memories_querys = self._create_query_questions()
 
-    new_memories = []
-    for memory_query in memories_querys:
-      new_memories.extend(self._generate_reflection(memory_query).result())
-
-    for memory in new_memories:
-      self._save_memory(memory).result()
-
-  def retrieve(self, query_question: str) -> list[MemoryEntry]:
-    recent_memories = self._agent_memory.memories[:70]
-    query_embedding = get_embedding(query_question, engine='text-embedding-ada-002')
-
-    for memory in recent_memories:
-      recency = memory.calculate_recency()
-      importance = memory.importance
-      relevance = cosine_similarity(query_embedding, memory.embedding)
-
-      recency_normalized = recency / 1
-      importance_normalized = (importance - 1) / 9
-      relevance_normalized = relevance / 1
-
-      memory.retrieval_value = (recency_normalized + importance_normalized + relevance_normalized)
-
-    recent_memories.sort(key=lambda memory: memory.retrieval_value, reverse=True)
+    threads = [self._generate_reflection(memory_query) for memory_query in memories_querys]
+    reflections = [thread.result() for thread in threads]
     
-    return recent_memories
+    for reflection in reflections:
+      for memory in reflection:
+        self._save_memory(memory)
