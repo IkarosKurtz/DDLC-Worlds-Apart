@@ -1,4 +1,4 @@
-from src.character_logging import CustomLogger
+from src.custom_logger import CustomLogger
 from .character_data import CharacterDetails
 from .agent_memory_manager import AgentMemoryManager
 from .agent_memory.agent_memory import AgentMemory
@@ -20,29 +20,55 @@ load_dotenv()
 
 openai.api_key = os.getenv("OPENAI")
 
-class Character:
-  def __init__(self, name: str, bio: str, habilites: str, memories: str, traits: str) -> None:
-    self._memory_db = AgentMemoryManager(name)
 
-    self._character_data = CharacterDetails(name, bio, traits, habilites, 'club room')
+class Character:
+  """ A character with personal data, memories, and decision-making capabilities. """
+
+  def __init__(self, name: str, bio: str, habilites: str, memories: str, traits: str, initial_location: str = 'club room') -> None:
+    """
+    Initialize the Character instance with personal data and memories.
+
+    Parameters
+    ----------
+    name : str
+      The name of the character.
+
+    bio : str
+      The biography of the character.
+
+    habilites : str
+      The abilities or skills of the character.
+
+    memories : str
+      The memories of the character, separated by semicolons.
+
+    traits : str
+      The traits of the character.
+
+    initial_location : str, optional
+      The initial location of the character, by default 'club room'.
+    """
+    self._memory_db = AgentMemoryManager(name, 'json')
+
+    self._character_data = CharacterDetails(name, bio, traits, habilites, initial_location)
 
     self._logger = CustomLogger(self._character_data)
-  
+
     memories = [memory.strip() for memory in memories.split(';')]
-    
+
     self._agent_memory = AgentMemory(memories, self._character_data, self._logger, self._memory_db)
 
     self.character_data.status = self._memory_db.get_agent_status()
 
     if self.character_data.status is None:
-      self.character_data.status  = self._generate_status()
+      self.character_data.status = self._generate_status()
 
     self._mood_analyzer = MoodAnalyzer(self._character_data, self._logger)
 
     self._conversation_history = ''
 
     initial_time = time.time()
-    
+
     self._decision_processor = DecisionProcessor(self._logger, self._agent_memory, self._character_data)
 
     self._generative_memory = GenerativeAgentMemory(self._character_data, self._agent_memory, self._logger)
@@ -63,8 +89,16 @@ class Character:
   @property
   def memories(self) -> list[MemoryEntry]:
     return self._agent_memory.memories
-    
+
   def _generate_bio(self) -> str:
+    """
+    Generate the biography of the character based on its memories and personal data.
+
+    Returns
+    -------
+    str
+      The generated biography of the character.
+    """
     self._logger.agent_info('Generating bio...')
 
     questions = (
@@ -105,14 +139,14 @@ class Character:
       list_of_memories = '\n'.join([f'- {memory.access()}.' for memory in memories])
 
       summary, _ = chat_completion(prompt.format(self._character_data.name, list_of_memories))
-      
+
       self._logger.agent_info(f'Generated summary for > {question}\nSummary: {summary}')
 
       return summary
-    
+
     threads = [generate_summary((prompt, question)) for prompt, question in zip(prompts, questions)]
-      
-    summaries = [thread for thread in threads]
+
+    summaries = [result for result in threads]
 
     new_description = textwrap.dedent("""
     You are a person named {}.
@@ -129,12 +163,20 @@ class Character:
     self._logger.agent_info(f'Generated bio: {new_description}')
 
     return new_description
-    
+
   def _generate_status(self) -> str:
+    """
+    Generate the current status of the character based on recent memories.
+
+    Returns
+    -------
+    str
+      The generated status of the character.
+    """
     self._logger.agent_info('Generating status...')
-    
+
     recent_memories = self._agent_memory.memories[:30]
-  
+
     list_of_memories = '\n'.join([f'{i + 1}. {memory.access()}' for i, memory in enumerate(recent_memories)])
 
     prompt = textwrap.dedent("""
@@ -159,22 +201,38 @@ class Character:
     self._memory_db.set_agent_status(new_status)
 
     return new_status
-  
-  def chat(self, speaker: str, message: str) -> str:
+
+  def chat(self, speaker: str, message: str) -> tuple(str, str):
+    """
+    Engage in a conversation with the character, processing the speaker's message.
+
+    Parameters
+    ----------
+    speaker : str
+      The name of the speaker engaging with the character.
+
+    message : str
+      The message or statement made by the speaker.
+
+    Returns
+    -------
+    tuple(str, str)
+      The response and pose of the character.
+    """
     initial_time = time.time()
 
     print(len(self._agent_memory.memories))
     if len(self._agent_memory.memories) % 40 == 0:
       self._generate_bio_thread.start()
-      
+
     self._conversation_history += f'{speaker}: {message.strip()}\n'
-    
+
     mood = None
 
     @threaded
     def generate_speaker_action(speaker: str, speaker_message: str) -> str:
       return self._decision_processor.determine_speaker_action(speaker, speaker_message)
-          
+
     @threaded
     def generate_observation(speaker: str, conversation_history: str) -> str:
       return self._decision_processor.generate_observation(speaker, conversation_history)
@@ -183,16 +241,16 @@ class Character:
     observation = generate_observation(speaker, self._conversation_history)
 
     questions = [f'Qué relación tienen {self._character_data.name} y {speaker}?', speaker_action]
-    
+
     memory_summaries = self._decision_processor.generate_memory_summaries(questions)
-    
+
     posible_action = self._decision_processor.determine_possible_action(observation, memory_summaries)
 
     self._logger.agent_info(f'Generating response...')
 
-    prompt =textwrap.dedent("""
+    prompt = textwrap.dedent("""
     Current Date: {}
-    {}'s State: {}
+    {} State: {}
     Current Location: {}
 
     Observation:
@@ -213,7 +271,8 @@ class Character:
     Response: <FILL IN>
     """).format(
       datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-      self._character_data.name,
+      f"{self._character_data.name}'s" if not self._character_data.name.endswith(
+        's') else f"{self._character_data.name}'",
       self._character_data.status,
       self._character_data.position,
       observation,
@@ -226,17 +285,17 @@ class Character:
     )
 
     self._logger.agent_info(f'Generated prompt: {prompt}')
-    
+
     response, tokens = chat_completion(prompt, self._character_data.bio)
     response = response[response.find(':') + 1:].strip()
     response = response.replace("\"", "")
 
     self._logger.agent_info(f'Generated response: {response} \nTokens: {tokens}')
-      
+
     self._conversation_history += f'{self._character_data.name}: {response}\n'
-    
+
     pose = self._mood_analyzer.determine_pose(response)
-    
+
     if tokens > 3000:
       self._conversation_history = ''
       self._generative_memory.generate_reflections()

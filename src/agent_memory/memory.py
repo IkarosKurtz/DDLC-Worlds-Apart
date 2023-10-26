@@ -5,17 +5,45 @@ import datetime
 import math
 import uuid
 
+
 class MemoryKind(Enum):
+  """
+  Enumeration for kinds of memory entries.
+
+  Attributes
+  ----------
+  OBSERVATION : int
+      Represents an observational memory.
+  REFLECTION : int
+      Represents a reflective memory.
+  """
+
   OBSERVATION = 0
   REFLECTION = 1
 
 
 class MemoryEntry:
+  """ Represents a memory entry with its details and metadata. """
+
   def __init__(self, description: str, importance: float, kind: MemoryKind, **attributes) -> None:
+    """
+    Initializes the MemoryEntry with the given parameters and attributes.
+
+    Parameters
+    ----------
+    description : str
+        The description or content of the memory.
+    importance : float
+        The importance level of the memory.
+    kind : MemoryKind
+        The kind of memory (observation or reflection).
+    **attributes:
+        Additional attributes like 'embedding', 'associated_memories' and others.
+    """
     self._description = description
     self._importance = importance
     self.kind = kind
-    
+
     defaults = {
       'id': str(uuid.uuid4()),
       'created_at': datetime.datetime.now(),
@@ -24,18 +52,18 @@ class MemoryEntry:
       'embedding': attributes.get('embedding', get_embedding(description, engine='text-embedding-ada-002')),
       'associated_memories': []
     }
-    
+
     for attribute, default in defaults.items():
-        setattr(self, f"_{attribute}", attributes.get(attribute, default))
+      setattr(self, f"_{attribute}", attributes.get(attribute, default))
 
   @property
   def id(self) -> str:
     return self._id
-  
+
   @property
   def description(self) -> str:
     return self._description
-  
+
   @property
   def importance(self) -> float:
     return self._importance
@@ -65,20 +93,41 @@ class MemoryEntry:
     return self._associated_memories
 
   def access(self) -> str:
+    """
+    Updates the accessed timestamp and returns the description of the memory.
+
+    Returns
+    -------
+    str
+        The description of the memory.
+    """
     self._accessed_at = datetime.datetime.now()
-    
     return self._description
 
   def calculate_recency(self) -> float:
-    """Calculate recency of memory based on time since last access."""
+    """
+    Calculates and returns the recency/decay value of the memory.
+
+    Returns
+    -------
+    float
+        The recency/decay value of the memory.
+    """
     diff = datetime.datetime.now().timestamp() - self._accessed_at.timestamp()
     self.access()
-    
-    recency = math.pow(.99, diff / 3600) # diff in millisenconds
+
+    recency = math.pow(.99, diff / 3600)  # diff in milliseconds
     return recency
 
   def as_dict(self) -> dict:
-    """Return a dictionary representation of the memory."""
+    """
+    Returns a dictionary representation of the memory entry.
+
+    Returns
+    -------
+    dict
+        A dictionary containing key details of the memory entry.
+    """
     return {
       '_id': self._id,
       'kind': self.kind.name,

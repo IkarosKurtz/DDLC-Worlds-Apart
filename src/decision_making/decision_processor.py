@@ -1,21 +1,52 @@
-from ..agent_memory.agent_memory import AgentMemory
-from ..character_data import CharacterDetails
-from ..character_logging import CustomLogger
-from ..openai_helpers.chat_completion import chat_completion
-from .thread_decorator import threaded
-
 import textwrap
 import datetime
 
+from ..agent_memory.agent_memory import AgentMemory
+from ..character_data import CharacterDetails
+from ..custom_logger import CustomLogger
+from ..openai_helpers.chat_completion import chat_completion
+from .thread_decorator import threaded
+
+
 class DecisionProcessor:
-  """Processes decision-making for generic questions, reasoning, and planning."""
+  """ Processes decision-making for generic questions, reasoning, and planning. """
 
   def __init__(self, logger: CustomLogger, agent_memory: AgentMemory, character_data: CharacterDetails) -> None:
+    """
+    Initializes the DecisionProcessor.
+
+    Parameters
+    ----------
+    logger : CustomLogger
+        An instance of CustomLogger for logging information.
+
+    agent_memory : AgentMemory
+        An instance of AgentMemory for retrieving and storing memories.
+
+    character_data : CharacterDetails
+        An instance of CharacterDetails containing details about the character.
+    """
     self._agent_memory = agent_memory
     self._character_data = character_data
     self._logger = logger
-  
+
   def determine_speaker_action(self, speaker: str, speaker_message: str) -> str:
+    """
+    Determines the high-level action taken by a speaker in a conversation.
+
+    Parameters
+    ----------
+    speaker : str
+        The name of the speaker.
+
+    speaker_message : str
+        The message or content spoken by the speaker.
+
+    Returns
+    -------
+    str
+        The high-level action taken by the speaker.
+    """
     self._logger.agent_info(f'Determining speaker action for {speaker}...')
 
     prompt = textwrap.dedent("""
@@ -41,6 +72,22 @@ class DecisionProcessor:
     return speaker_action
 
   def generate_observation(self, speaker: str, conversation: str) -> str:
+    """
+    Generates a high-level observation about the conversation.
+
+    Parameters
+    ----------
+    speaker : str
+        The name of the speaker.
+
+    conversation : str
+        The content of the conversation.
+
+    Returns
+    -------
+    str
+        The generated high-level observation about the conversation.
+    """
     self._logger.agent_info('Generating observation...')
 
     prompt = textwrap.dedent("""
@@ -67,8 +114,21 @@ class DecisionProcessor:
     return observation
 
   def generate_memory_summaries(self, questions: list[str]) -> list[str]:
+    """
+    Generates summaries of memories related to given questions.
+
+    Parameters
+    ----------
+    questions : list[str]
+        A list of questions for which memory summaries are to be generated.
+
+    Returns
+    -------
+    list[str]
+        A list of generated memory summaries.
+    """
     self._logger.agent_info('Generating memory summaries...')
-  
+
     prompt = textwrap.dedent("""
     Information (Records):
     {}
@@ -93,18 +153,30 @@ class DecisionProcessor:
       self._logger.agent_info(f'Generated memory summary: {normalized_summary}')
 
       summaries.append(normalized_summary)
-      return 0
-        
-    threads = [wrap(question) for question in questions]
-        
-    for thread in threads:
-      res = thread
-    
+
+    _ = [wrap(question) for question in questions]
+
     return summaries
 
   def determine_possible_action(self, observation: str, memory_summaries: list[str]) -> str:
+    """
+    Determines a possible action the agent can take based on the observation and memory summaries.
+
+    Parameters
+    ----------
+    observation : str
+        The high-level observation about the situation.
+
+    memory_summaries : list[str]
+        A list of summaries of relevant memories.
+
+    Returns
+    -------
+    str
+        The determined possible action for the agent.
+    """
     self._logger.agent_info('Generating possible agent action...')
-    
+
     prompt = textwrap.dedent("""
     Description of {}:
     {}
@@ -125,16 +197,16 @@ class DecisionProcessor:
     Format:
     Action: <FILL IN>
     """).format(
-    self._character_data.name,
-    self._character_data.bio,
-    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    self._character_data.name,
-    self._character_data.status,
-    self._character_data.position,
-    observation,
-    self._character_data.name,
-    '\n\n'.join([f'{summary}' for summary in memory_summaries]),
-    self._character_data.name
+      self._character_data.name,
+      self._character_data.bio,
+      datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+      self._character_data.name,
+      self._character_data.status,
+      self._character_data.position,
+      observation,
+      self._character_data.name,
+      '\n\n'.join([f'{summary}' for summary in memory_summaries]),
+      self._character_data.name
     )
 
     possible_action, _ = chat_completion(prompt, self._character_data.bio)
