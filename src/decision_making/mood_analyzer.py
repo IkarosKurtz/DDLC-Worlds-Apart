@@ -38,12 +38,12 @@ class MoodAnalyzer:
       'rdown': 'right arm down',
       'rhip': 'right arm on hip',
     }
+        
+    self._mood_list = '\n'.join([f'{key}: {value}' for key, value in self.available_moods.items()])
+    
+    self._pose_list = '\n'.join([f'{key}: {value}' for key, value in self.arm_positions.items()])
     
   def determine_pose(self, message: str) -> str:  
-    mood_list = '\n'.join([f'{key}: {value}' for key, value in self.available_moods.items()])
-    
-    pose_list = '\n'.join([f'{key}: {value}' for key, value in self.arm_positions.items()])
-    
     self._log_handler.agent_info('Determining pose...')
     
     prompt = textwrap.dedent("""
@@ -67,8 +67,8 @@ class MoodAnalyzer:
     FullState: <MOOD> /*/ <POSE>
     """).format(
       message,
-      mood_list,
-      pose_list
+      self._mood_list,
+      self._pose_list
     )
     
     response, _ = chat_completion(prompt)
@@ -77,6 +77,13 @@ class MoodAnalyzer:
     chosen_mood = chosen_state.split("/*/")[0].strip()
     chosen_pose = chosen_state.split("/*/")[1].strip()
     
-    self._log_handler.agent_info(f'Determined pose: {chosen_pose}')
+    if chosen_mood not in self.available_moods:
+      chosen_mood = 'neut'
+      
+    if chosen_pose not in self.arm_positions:
+      chosen_pose = ' '
     
-    return f'{chosen_mood} {chosen_pose}'
+    full_state = f'{chosen_mood} {chosen_pose}'.strip()
+    self._log_handler.agent_info(f'Determined pose: {full_state}')
+    
+    return full_state

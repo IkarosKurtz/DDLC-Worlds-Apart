@@ -4,7 +4,7 @@ import logging
 import os
 
 class CustomLogger:
-  LOG_FORMAT = '[%(levelname)s]: %(message)s - %(asctime)s'
+  LOG_FORMAT = '[%(levelname)s # %(asctime)s]: %(message)s'
   DATE_FORMAT = '%Y/%m/%d %H:%M:%S'
 
   def __init__(self, personal_data: CharacterDetails) -> None:

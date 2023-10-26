@@ -22,7 +22,7 @@ openai.api_key = os.getenv("OPENAI")
 
 class Character:
   def __init__(self, name: str, bio: str, habilites: str, memories: str, traits: str) -> None:
-    self._memory_db = AgentMemoryManager(name)
+    self._memory_db = AgentMemoryManager(name, 'json')
 
     self._character_data = CharacterDetails(name, bio, traits, habilites, 'club room')
 
@@ -160,7 +160,7 @@ class Character:
 
     return new_status
   
-  def chat(self, speaker: str, message: str) -> str:
+  def chat(self, speaker: str, message: str) -> list[list[str]]:
     initial_time = time.time()
 
     print(len(self._agent_memory.memories))
@@ -168,8 +168,6 @@ class Character:
       self._generate_bio_thread.start()
       
     self._conversation_history += f'{speaker}: {message.strip()}\n'
-    
-    mood = None
 
     @threaded
     def generate_speaker_action(speaker: str, speaker_message: str) -> str:
@@ -235,7 +233,9 @@ class Character:
       
     self._conversation_history += f'{self._character_data.name}: {response}\n'
     
-    pose = self._mood_analyzer.determine_pose(response)
+    response_chunks = [m.strip() if m.endswith('?') or m.endswith('!') else m.strip() + '.' for m in response.split('.') if m.strip() != '']
+    
+    full_response = [[self._mood_analyzer.determine_pose(chunk), chunk] for chunk in response_chunks]
     
     if tokens > 3000:
       self._conversation_history = ''
@@ -245,4 +245,4 @@ class Character:
 
     self._logger.agent_info(f'Finished generating response in {time.time() - initial_time} seconds')
 
-    return (response, pose)
+    return full_response

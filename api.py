@@ -14,14 +14,14 @@ def read_root():
 def chat(message, speaker):
   print(message, speaker)
   
-  response, pose = agent.chat(speaker, message)
+  list_of_responses = agent.chat(speaker, message)
   
-  print(f'{pose}: {response}')
+  for [pose, response] in list_of_responses:
+    print(f'{pose}: {response}')
 
   return {
-    "response": response,
     "character": agent.character_data.name,
-    "pose": pose
+    "responses": list_of_responses
   }
   
 if __name__ == '__main__':
