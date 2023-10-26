@@ -8,20 +8,20 @@ import textwrap
 class MoodAnalyzer:
   """ Analyzes the mood and pose based on given messages. """
 
-  def __init__(self, character_info: CharacterDetails, log_handler: CustomLogger) -> None:
+  def __init__(self, character_data: CharacterDetails, logger: CustomLogger) -> None:
     """
     Initializes the MoodAnalyzer.
 
     Parameters
     ----------
-    character_info : CharacterDetails
+    character_data : CharacterDetails
         An instance of CharacterDetails containing details about the character.
 
-    log_handler : CustomLogger
+    logger : CustomLogger
         An instance of CustomLogger for logging information.
     """
-    self._character_info = character_info
-    self._log_handler = log_handler
+    self._character_data = character_data
+    self._logger = logger
 
     self.available_moods = {
       'neut': 'neutral',
@@ -71,7 +71,7 @@ class MoodAnalyzer:
     str
         The determined pose of the character.
     """
-    self._log_handler.agent_info('Determining pose...')
+    self._logger.agent_info('Determining pose...')
 
     prompt = textwrap.dedent("""
     My message:
@@ -105,6 +105,6 @@ class MoodAnalyzer:
     chosen_mood = chosen_state.split("/*/")[0].strip()
     chosen_pose = chosen_state.split("/*/")[1].strip()
     
-    self._log_handler.agent_info(f'Determined pose: {chosen_pose}')
+    self._logger.agent_info(f'Determined pose: {chosen_pose}')
     
     return f'{chosen_mood} {chosen_pose}'

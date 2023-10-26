@@ -18,7 +18,7 @@ import os
 import openai
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class Character:
@@ -221,7 +221,7 @@ class Character:
     """
     initial_time = time.time()
 
-    print(len(self._agent_memory.memories))
+    print(f'{len(self._agent_memory.memories):_^50}')
     if len(self._agent_memory.memories) % 40 == 0:
       self._generate_bio_thread.start()
 
@@ -238,7 +238,7 @@ class Character:
     speaker_action = generate_speaker_action(speaker, message)
     observation = generate_observation(speaker, self._conversation_history)
 
-    questions = [f'Qué relación tienen {self._character_data.name} y {speaker}?', speaker_action]
+    questions = [f'What is the relationship between {self._character_data.name} and {speaker}?', speaker_action]
 
     memory_summaries = self._decision_processor.generate_memory_summaries(questions)
 

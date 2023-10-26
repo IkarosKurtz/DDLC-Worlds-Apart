@@ -139,8 +139,6 @@ class GenerativeAgentMemory:
     threads = [self._generate_reflection(memory_query) for memory_query in memory_queries]
     reflections = [thread for thread in threads]
 
-    save_threads = []
-
     for reflection in reflections:
       for memory in reflection:
-        save_threads.append(self._save_memory(memory))
+        self._save_memory(memory)
