@@ -1,14 +1,28 @@
 from ..openai_helpers.chat_completion import chat_completion
 from ..character_data import CharacterDetails
-from ..character_logging import CustomLogger
+from ..custom_logger import CustomLogger
 
 import textwrap
 
+
 class MoodAnalyzer:
+  """ Analyzes the mood and pose based on given messages. """
+
   def __init__(self, character_info: CharacterDetails, log_handler: CustomLogger) -> None:
+    """
+    Initializes the MoodAnalyzer.
+
+    Parameters
+    ----------
+    character_info : CharacterDetails
+        An instance of CharacterDetails containing details about the character.
+
+    log_handler : CustomLogger
+        An instance of CustomLogger for logging information.
+    """
     self._character_info = character_info
     self._log_handler = log_handler
-    
+
     self.available_moods = {
       'neut': 'neutral',
       'angr': 'angry',
@@ -25,27 +39,40 @@ class MoodAnalyzer:
       'pani': 'panicked',
       'pout': 'pouting',
       'sad': 'sad',
-      'sedu': 'seductive',  
+      'sedu': 'seductive',
       'shoc': 'shocked',
       'vang': 'very angry',
       'vsur': 'very surprised',
       'worr': 'worried'
     }
-    
+
     self.arm_positions = {
       'ldown': 'left arm down',
       'lpoint': 'left arm up',
       'rdown': 'right arm down',
-      'rhip': 'right arm on hip',
+      'rhip': 'right arm on hip'
     }
-        
+    
+    
     self._mood_list = '\n'.join([f'{key}: {value}' for key, value in self.available_moods.items()])
-    
     self._pose_list = '\n'.join([f'{key}: {value}' for key, value in self.arm_positions.items()])
-    
-  def determine_pose(self, message: str) -> str:  
+
+  def determine_pose(self, message: str) -> str:
+    """
+    Determines the pose of the character based on the given message.
+
+    Parameters
+    ----------
+    message : str
+        The message based on which the pose is to be determined.
+
+    Returns
+    -------
+    str
+        The determined pose of the character.
+    """
     self._log_handler.agent_info('Determining pose...')
-    
+
     prompt = textwrap.dedent("""
     My message:
     {}
@@ -59,8 +86,9 @@ class MoodAnalyzer:
 
     List of poses:
     {}
-
-    Use the left value to select the correct mood (do not modify the value).
+    
+    Example:
+    neut: neutral # use neut as value, do the same for the rest of the values 
 
     Format:
 
@@ -73,17 +101,10 @@ class MoodAnalyzer:
     
     response, _ = chat_completion(prompt)
     chosen_state = response.split(":")[1].strip()
-    
+
     chosen_mood = chosen_state.split("/*/")[0].strip()
     chosen_pose = chosen_state.split("/*/")[1].strip()
     
-    if chosen_mood not in self.available_moods:
-      chosen_mood = 'neut'
-      
-    if chosen_pose not in self.arm_positions:
-      chosen_pose = ' '
+    self._log_handler.agent_info(f'Determined pose: {chosen_pose}')
     
-    full_state = f'{chosen_mood} {chosen_pose}'.strip()
-    self._log_handler.agent_info(f'Determined pose: {full_state}')
-    
-    return full_state
+    return f'{chosen_mood} {chosen_pose}'
