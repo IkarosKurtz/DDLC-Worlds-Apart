@@ -7,11 +7,11 @@ Immerse yourself in an unparalleled dialogue experience with the members of the 
 ## Table of Contents
 
 - [About](#about) 📖
+- [Notes](#notes) 📝 
 - [Features](#features) 🎮
 - [Technology](#technology) 🧠
 - [Installation](#installation) 🛠️
 - [Credits](#credits) 🙏
-- [License](#license) 📜
 
 ## About
 
@@ -23,6 +23,12 @@ DDLC AI reimagines the way you engage with the Literature Club members. While th
 - **Natsuki**: 🟠 Coming Soon
 - **Yuri**: 🟠 Coming Soon
 - **MC**: ❓
+
+## Notes
+
+For now you only can talk with Monika with the cmd/terminal. Ren'Py is not ready yet (Sorry).
+
+Sometimes the AI gets stuck in a process, I try to fix this error. For now, just restart the AI.
 
 ## Features
 
@@ -44,7 +50,7 @@ Our bespoke implementation introduces optimizations, ensuring faster and seamles
 
 1. [Ren'Py](https://www.renpy.org/latest.html) - The heart of DDLC.
 2. [Python](https://www.python.org/downloads/) - For backend processes.
-3. DDLC AI Repository.
+3. DDLC Worlds Apart Repository.
 
 **Setup**:
 
@@ -63,10 +69,12 @@ env\Scripts\activate
 pip install -r requirements.txt
 ```
 6. Configure your .env:
-  `OPENAI`: Your OpenAI API Key.
-  `MONGO_URI`: Your MongoDB Connection URI.
-7. Boot up Ren'Py, select "DDLC Hope", and initiate your experience.
+  `OPENAI_API_KEY`: Your OpenAI API Key.
+  `MONGO_URI`: Your MongoDB Connection URI. (Optional)
+7. Boot up Ren'Py, select "DDLC Worlds Apart", and initiate your experience. This is not ready yet.
 
 ## Credits
 A heartfelt appreciation to Google, Stanford University, and OpenAI for their invaluable research and tools. This project stands on the shoulders of their pioneering work.
+
+
 

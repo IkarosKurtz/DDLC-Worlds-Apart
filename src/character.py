@@ -24,7 +24,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 class Character:
   """ A character with personal data, memories, and decision-making capabilities. """
 
-  def __init__(self, name: str, bio: str, habilites: str, memories: str, traits: str, initial_location: str = 'club room') -> None:
+  def __init__(self, name: str, bio: str, abilities: str, memories: str, traits: str, initial_location: str = 'club room') -> None:
     """
     Initialize the Character instance with personal data and memories.
 
@@ -36,7 +36,7 @@ class Character:
     bio : str
       The biography of the character.
 
-    habilites : str
+    abilities : str
       The abilities or skills of the character.
 
     memories : str
@@ -50,7 +50,7 @@ class Character:
     """
     self._memory_db = AgentMemoryManager(name, 'json')
 
-    self._character_data = CharacterDetails(name, bio, traits, habilites, initial_location)
+    self._character_data = CharacterDetails(name, bio, traits, abilities, initial_location)
 
     self._logger = CustomLogger(self._character_data)
 
@@ -153,12 +153,12 @@ class Character:
     Your bio is the following:
     {}
     
-    Your habilites are the following:
+    Your abilities are the following:
     {}
     
     Your traits are the following:
     {}    
-    """).format(self._character_data.name, '\n\n'.join(summaries), self._character_data.habilites, self._character_data.traits)
+    """).format(self._character_data.name, '\n\n'.join(summaries), self._character_data.abilities, self._character_data.traits)
 
     self._logger.agent_info(f'Generated bio: {new_description}')
 
@@ -221,7 +221,7 @@ class Character:
     """
     initial_time = time.time()
 
-    print(f'{len(self._agent_memory.memories):_^50}')
+    # print(f'{len(self._agent_memory.memories):_^50}')
     if len(self._agent_memory.memories) % 40 == 0:
       self._generate_bio_thread.start()
 
