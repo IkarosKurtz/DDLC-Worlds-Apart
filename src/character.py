@@ -77,6 +77,8 @@ class Character:
 
     self._generate_bio_thread = threading.Thread(target=self._generate_bio, daemon=True, name='Generate Bio Thread')
 
+    self._status_thread = threading.Thread(target=self._generate_status, daemon=True, name='Generate Status Thread')
+
     if self._agent_memory._is_initial_run:
       self._generative_memory.generate_reflections()
 
@@ -221,7 +223,6 @@ class Character:
     """
     initial_time = time.time()
 
-    # print(f'{len(self._agent_memory.memories):_^50}')
     if len(self._agent_memory.memories) % 40 == 0:
       self._generate_bio_thread.start()
 
@@ -297,9 +298,10 @@ class Character:
 
     full_response = [[self._mood_analyzer.determine_pose(chunk), chunk] for chunk in response_chunks]
 
-    if tokens > 3000:
+    if tokens > 3500:
       self._conversation_history = ''
       self._generative_memory.generate_reflections()
+      self._status_thread.start()
 
     self._agent_memory.record_memory(observation)
 
