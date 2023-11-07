@@ -52,8 +52,7 @@ class MoodAnalyzer:
       'rdown': 'right arm down',
       'rhip': 'right arm on hip'
     }
-    
-    
+
     self._mood_list = '\n'.join([f'{key}: {value}' for key, value in self.available_moods.items()])
     self._pose_list = '\n'.join([f'{key}: {value}' for key, value in self.arm_positions.items()])
 
@@ -98,13 +97,16 @@ class MoodAnalyzer:
       self._mood_list,
       self._pose_list
     )
-    
+
     response, _ = chat_completion(prompt)
     chosen_state = response.split(":")[1].strip()
 
     chosen_mood = chosen_state.split("/*/")[0].strip()
     chosen_pose = chosen_state.split("/*/")[1].strip()
-    
+
+    chosen_mood = chosen_mood if self.available_moods.get(chosen_mood) else 'neut'
+    chosen_pose = chosen_pose if self.arm_positions.get(chosen_pose) else 'ldown'
+
     self._logger.agent_info(f'Determined pose: {chosen_pose}')
-    
+
     return f'{chosen_mood} {chosen_pose}'
