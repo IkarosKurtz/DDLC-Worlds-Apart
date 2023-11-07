@@ -201,7 +201,7 @@ class Character:
     self._memory_db.set_agent_status(new_status)
 
     return new_status
-  
+
   def chat(self, speaker: str, message: str) -> list[list[str]]:
     """
     Engage in a conversation with the character, processing the speaker's message.
@@ -284,18 +284,19 @@ class Character:
 
     self._logger.agent_info(f'Generated prompt: {prompt}')
 
-    response, tokens = chat_completion(prompt, self._character_data.bio)
+    response, tokens = chat_completion(prompt, self._character_data.bio, '16k')
     response = response[response.find(':') + 1:].strip()
     response = response.replace("\"", "")
 
     self._logger.agent_info(f'Generated response: {response} \nTokens: {tokens}')
 
     self._conversation_history += f'{self._character_data.name}: {response}\n'
-    
-    response_chunks = [m.strip() if m.endswith('?') or m.endswith('!') else m.strip() + '.' for m in response.split('.') if m.strip() != '']
-    
+
+    response_chunks = [m.strip() if m.endswith('?') or m.endswith('!') else m.strip() +
+                               '.' for m in response.split('.') if m.strip() != '']
+
     full_response = [[self._mood_analyzer.determine_pose(chunk), chunk] for chunk in response_chunks]
-    
+
     if tokens > 3000:
       self._conversation_history = ''
       self._generative_memory.generate_reflections()
