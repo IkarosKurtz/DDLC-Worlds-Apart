@@ -45,7 +45,7 @@ class CustomLogger:
     logger.setLevel(logging.INFO)
 
     console_handler = self._create_handler(logging.StreamHandler(), logging.INFO)
-    file_handler = self._create_handler(logging.FileHandler(log_file), logging.INFO)
+    file_handler = self._create_handler(logging.FileHandler(log_file, encoding='utf-8'), logging.INFO)
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
