@@ -59,6 +59,7 @@ class AgentMemory:
         self._is_initial_run = True
         self.record_memory(memory)
         self._logger.memory_info(f"Stored memory: {memory}")
+        continue
 
       self._is_initial_run = False
       self._logger.memory_info(f"Memory: {memory} already exists in the database")

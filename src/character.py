@@ -61,7 +61,7 @@ class Character:
     self.character_data.status = self._memory_db.get_agent_status()
 
     if self.character_data.status is None:
-      self.character_data.status = self._generate_status()
+      self.character_data.status = "Monika have afraid and doesn't know what is happening, she is trying to figure out what is happening."
 
     self._mood_analyzer = MoodAnalyzer(self._character_data, self._logger)
 
@@ -296,7 +296,11 @@ class Character:
     response_chunks = [m.strip() if m.endswith('?') or m.endswith('!') else m.strip() +
                                '.' for m in response.split('.') if m.strip() != '']
 
-    full_response = [[self._mood_analyzer.determine_pose(chunk), chunk] for chunk in response_chunks]
+    @threaded
+    def _determine_pose(chunk):
+      return self._mood_analyzer.determine_pose(chunk)
+
+    full_response = [[_determine_pose(chunk), chunk] for chunk in response_chunks]
 
     if tokens > 3500:
       self._conversation_history = ''

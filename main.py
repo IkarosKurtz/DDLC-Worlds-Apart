@@ -9,7 +9,7 @@ load_dotenv()
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-agent = Character('Monika', monika['bio'], monika['abilities'], monika['memories'], monika['traits'])
+agent = Character('Monika', monika['bio'], monika['abilities'], monika['memories'], monika['traits'], initial_location="Club Room")
 
 if __name__ == '__main__':
   while True:

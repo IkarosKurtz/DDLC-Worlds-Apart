@@ -110,6 +110,11 @@ class GenerativeAgentMemory:
       description, refs = insight.split('/*/')
       references = [int(ref) for ref in re.findall(r"\d+", refs)]
       memory_references = [memories[ref - 1].id for ref in references]
+
+      description = description[description.find('.') + 1:]
+
+      self._logger.memory_info(f'Generated reflection: {description.strip()}, references: {refs}')
+
       new_reflections.append({'description': description.strip(), 'references': memory_references})
 
     return new_reflections

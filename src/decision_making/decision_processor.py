@@ -135,7 +135,7 @@ class DecisionProcessor:
 
     Using only the information above.
     Make an exact summary that is coherent, concise, and complete. Only put the summary, no titles or things like that.
-    MANDATORY, follow the following format (the summary has to be in Spanish):
+    MANDATORY, follow the following format.:
 
     Format:
     Summary: <FILL IN>
