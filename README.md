@@ -26,9 +26,15 @@ DDLC AI reimagines the way you engage with the Literature Club members. While th
 
 ## Notes
 
-For now you only can talk with Monika with the cmd/terminal. Ren'Py is not ready yet (Sorry).
+- DDLC AI is a work in progress. Expect bugs and missing features.
 
-Sometimes the AI gets stuck in a process, I try to fix this error. For now, just restart the AI.
+- DDLC AI is not affiliated with Team Salvato. DDLC AI is a fan project.
+
+- DDLC AI is not a replacement for DDLC. It begins after the events of DDLC.
+
+- Sometimes the AI gets stuck in a process, I try to fix this error. For now, just restart the AI.
+
+- This mod stores Monika Memories in a MongoDB database, if you don't want to use it, it also can sotore them in a JSON file. By default, it uses a JSON file.
 
 ## Features
 
@@ -48,33 +54,45 @@ Our bespoke implementation introduces optimizations, ensuring faster and seamles
 
 **Prerequisites**:
 
-1. [Ren'Py](https://www.renpy.org/latest.html) - The heart of DDLC.
-2. [Python](https://www.python.org/downloads/) - For backend processes.
-3. DDLC Worlds Apart Repository.
+1. [Python](https://www.python.org/downloads/) - For backend processes.
+2. DDLC Worlds Apart Repository.
 
 **Setup**:
 
+### AI Setup
 1. Clone or download this repository.
 2. Navigate to the project directory.
 3. Initiate a virtual environment:
-```bash
+```
 python -m venv env
 ```
 4. Activate the virtual environment:
-```bash
+```
 env\Scripts\activate
 ```
 5. Install dependencies:
-```bash
+```
 pip install -r requirements.txt
 ```
 6. Configure your .env:
-  `OPENAI_API_KEY`: Your OpenAI API Key.
-  `MONGO_URI`: Your MongoDB Connection URI. (Optional)
-7. Boot up Ren'Py, select "DDLC Worlds Apart", and initiate your experience. This is not ready yet.
+  * `OPENAI_API_KEY`: Your OpenAI API Key.
+  * `MONGO_URI`: Your MongoDB Connection URI. (Optional)
+
+7. Run the AI:
+```
+python api.py
+```  
+
+### MOD Setup
+
+1. In the root of the prject, locate the `Worlds Apart` folder and unzip WorldsApart.rar.
+2. Get a fresh copy of DDLC from [here](https://ddlc.moe/).
+3. Copy/move all the contents of the `DDLC Worlds Apart` folder into the root of your DDLC folder. When prompted to replace files select `Yes`, basically you are replacing the original files with the modded files.
+4. Run Worlds Apart and the AI.
+5. Last but not least, enjoy!
 
 ## Credits
 A heartfelt appreciation to Google, Stanford University, and OpenAI for their invaluable research and tools. This project stands on the shoulders of their pioneering work.
 
-
+Dan Salvato and Team Salvato for creating such an amazing game and community.
 
