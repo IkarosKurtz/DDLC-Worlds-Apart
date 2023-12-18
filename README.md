@@ -36,6 +36,8 @@ DDLC AI reimagines the way you engage with the Literature Club members. While th
 
 - This mod stores Monika Memories in a MongoDB database, if you don't want to use it, it also can sotore them in a JSON file. By default, it uses a JSON file.
 
+- I'm making a video about this project, I will upload it to my YouTube channel (named IkarosKurtz), I will put the link here when is ready.
+
 ## Features
 
 - **Generative Conversations**: Speak freely and receive human-like responses.
@@ -85,7 +87,7 @@ python api.py
 
 ### MOD Setup
 
-1. Download the rar from releases tab [here]().
+1. Download the rar from releases tab [here](https://github.com/IkarosKurtz/DDLC-Worlds-Apart/releases/tag/v0.0.1-alpha).
 2. Extract the rar. You should get a folder called `DDLC Worlds Apart`.
 3. Get a fresh copy of DDLC from [here](https://ddlc.moe/).
 4. Copy/move all the contents of the `DDLC Worlds Apart` folder into the root of your DDLC folder. When prompted to replace files select `Yes`, basically you are replacing the original files with the modded files.
