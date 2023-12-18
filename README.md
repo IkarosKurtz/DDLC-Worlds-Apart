@@ -85,11 +85,12 @@ python api.py
 
 ### MOD Setup
 
-1. In the root of the prject, locate the `Worlds Apart` folder and unzip WorldsApart.rar.
-2. Get a fresh copy of DDLC from [here](https://ddlc.moe/).
-3. Copy/move all the contents of the `DDLC Worlds Apart` folder into the root of your DDLC folder. When prompted to replace files select `Yes`, basically you are replacing the original files with the modded files.
-4. Run Worlds Apart and the AI.
-5. Last but not least, enjoy!
+1. Download the rar from releases tab [here]().
+2. Extract the rar. You should get a folder called `DDLC Worlds Apart`.
+3. Get a fresh copy of DDLC from [here](https://ddlc.moe/).
+4. Copy/move all the contents of the `DDLC Worlds Apart` folder into the root of your DDLC folder. When prompted to replace files select `Yes`, basically you are replacing the original files with the modded files.
+5. Run `DokiDokiWorldsAparts.exe`, also run the AI (follow the AI Setup).
+6. Last but not least, enjoy!
 
 ## Credits
 A heartfelt appreciation to Google, Stanford University, and OpenAI for their invaluable research and tools. This project stands on the shoulders of their pioneering work.
