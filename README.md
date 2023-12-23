@@ -1,8 +1,8 @@
 # DDLC Worlds Apart
 
-Immerse yourself in an unparalleled dialogue experience with the members of the Literature Club. DDLC AI extends beyond pre-scripted responses, introducing fluid, generative, and memory-rich interactions.
+Immerse yourself in an unparalleled dialogue experience with the members of the Literature Club. DDLC Worlds Apart extends beyond pre-scripted responses, introducing fluid, generative, and memory-rich interactions.
 
-![DDLC AI Banner](./static/placeholder.png)
+![DDLC Worlds Apart Banner](./static/placeholder.png)
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ Immerse yourself in an unparalleled dialogue experience with the members of the 
 
 ## About
 
-DDLC AI reimagines the way you engage with the Literature Club members. While the current version places you in the familiar clubroom, future iterations will unveil more environments and opportunities for exploration.
+DDLC Worlds Apart reimagines the way you engage with the Literature Club members. While the current version places you in the familiar clubroom, future iterations will unveil more environments and opportunities for exploration.
 
 **Character Status:**
 - **Monika**: 🟢 Active
@@ -26,11 +26,11 @@ DDLC AI reimagines the way you engage with the Literature Club members. While th
 
 ## Notes
 
-- DDLC AI is a work in progress. Expect bugs and missing features.
+- DDLC Worlds Apart is a work in progress. Expect bugs and missing features.
 
-- DDLC AI is not affiliated with Team Salvato. DDLC AI is a fan project.
+- DDLC Worlds Apart is not affiliated with Team Salvato. DDLC AI is a fan project.
 
-- DDLC AI is not a replacement for DDLC. It begins after the events of DDLC.
+- DDLC Worlds Apart is not a replacement for DDLC. It begins after the events of DDLC.
 
 - Sometimes the AI gets stuck in a process, I try to fix this error. For now, just restart the AI.
 
@@ -46,7 +46,7 @@ DDLC AI reimagines the way you engage with the Literature Club members. While th
 
 ## Technology
 
-At the core of DDLC AI is a Generative Agent, inspired by cutting-edge research from Google and Stanford University. Powering these interactions is ChatGPT, specifically the `gpt-3.5-turbo` variant, boasting 175 billion parameters.
+At the core of DDLC Worlds Apart is a Generative Agent, inspired by cutting-edge research from Google and Stanford University. Powering these interactions is ChatGPT, specifically the `gpt-3.5-turbo` variant, boasting 175 billion parameters.
 
 📄 [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442.pdf)
 
