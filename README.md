@@ -15,7 +15,7 @@ Immerse yourself in an unparalleled dialogue experience with the members of the 
 
 ## About
 
-DDLC AI reimagines the way you engage with the Literature Club members. While the current version places you in the familiar clubroom, future iterations will unveil more environments and opportunities for exploration.
+DDLC Worlds Apart reimagines the way you engage with the Literature Club members. While the current version places you in the familiar clubroom, future iterations will unveil more environments and opportunities for exploration.
 
 **Character Status:**
 - **Monika**: 🟢 Active
@@ -26,11 +26,11 @@ DDLC AI reimagines the way you engage with the Literature Club members. While th
 
 ## Notes
 
-- DDLC AI is a work in progress. Expect bugs and missing features.
+- DDLC Worlds Apart is a work in progress. Expect bugs and missing features.
 
-- DDLC AI is not affiliated with Team Salvato. DDLC AI is a fan project.
+- DDLC Worlds Apart is not affiliated with Team Salvato. DDLC AI is a fan project.
 
-- DDLC AI is not a replacement for DDLC. It begins after the events of DDLC.
+- DDLC Worlds Apart is not a replacement for DDLC. It begins after the events of DDLC.
 
 - Sometimes the AI gets stuck in a process, I try to fix this error. For now, just restart the AI.
 
