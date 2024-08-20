@@ -11,20 +11,29 @@ define persistent.steam = ("steamapps" in config.basedir.lower())
 
 # This variable declares whether Developer Mode is on or off in the mod.
 define config.developer = False
-
 default monika_agent = None
 default persistent.location = None
 default persistent.temperature = 0.2
 default persistent.current_tokens = 0
 define persistent.seed = 0
-define executor = None
-define monika_agent = None
-define nexis = None
+default executor = None
+
+define parser = WorldParser()
+define nexis = parser.unpack()
+default current_place = None
+define weather = WorldWeather()
+default persistent.current_weather = ["Sunny", None]
+define game_seconds = 2 # Each 1.5 seconds in real time is 2 minutes in game time
+default persistent.world_time = [12, 0, 0]
+default persistent.current_day = 1
+define day_duration = 24
+
+init python in mystore:
+    _contant = True
+    generator = None
+
 default 1 message = ""
 default selected_char = ""
-define persistent.world_time = [12, 00]
-define game_seconds = 2 # Each 1.5 seconds in real time is 2 minutes in game time
-default current_place = None
 define 1 characters = {
     'monika': m,
     'sayori': s,
@@ -67,19 +76,11 @@ define character_heads = {
 init python:
     import random
     from concurrent.futures import ThreadPoolExecutor
-
-    if persistent.world_time is not list:
-        print("Initializing world time")
-        persistent.world_time = [12, 00]
     
     print("Initializing executor")
     executor = ThreadPoolExecutor(max_workers = 25)
     persistent.seed = random.randint(0, 10000)
 
-    schema = os.path.join(renpy.config.gamedir, "schema.json")
-
-    parser = WorldParser(schema)
-    nexis = parser.unpack()
     cr = nexis.get_location('Club Room')
     cr.add_character('Monika')
     cr.add_character('Sayori')

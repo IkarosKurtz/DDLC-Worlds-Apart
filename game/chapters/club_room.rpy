@@ -1,14 +1,47 @@
-init python:
+init -1 python:
+  mystore.generator = None
+
+  def init_weather():
+    time = day_duration - persistent.world_time[0]
+    print(f'Time to weather: {time} = {day_duration} - {persistent.world_time[0]}')
+
+    global generator
+    generator = weather.simulate_weather_with_transitions(time, persistent.current_weather[0])
+
   def update_time():
+    global generator
+
     if persistent.world_time[1] + game_seconds >= 60:
       persistent.world_time[1] = 0
       persistent.world_time[0] += 1
 
+      if generator is None:
+        init_weather()
+
+      try:
+        new_weather = next(generator)
+
+      except StopIteration:
+        init_weather()
+      except Exception as e:
+        init_weather()
+        print(e)
+      finally:
+        new_weather = next(generator)
+
+      if new_weather['weather'] != persistent.current_weather[0]:
+        persistent.current_weather[0] = new_weather['weather']
+        persistent.current_weather[1] = new_weather['data']
+
     if persistent.world_time[0] + 1 >= 24:
       persistent.world_time[0] = 0
 
+      persistent.current_day += 1
+
+      
+
     persistent.world_time[1] += game_seconds
-    print(game_seconds)
+
     renpy.restart_interaction()
 
 

@@ -427,7 +427,7 @@ transform customzoom:
 
 screen display_locations:
     $ characters_in_location = nexis.get_characters()
-    $ time = f"{persistent.world_time[0]:02}: {persistent.world_time[1]:02} (24 format)"
+    $ time = f"{persistent.world_time[0]:02}: {persistent.world_time[1]:02}"
 
     key "K_LEFT" action [SetVariable("idx", (idx - 1) % len(all_locations)), Play("sound", gui.activate_sound)]
     key "K_RIGHT" action [SetVariable("idx", (idx + 1) % len(all_locations)),Play("sound", gui.activate_sound)]
@@ -453,8 +453,11 @@ screen display_locations:
                     vbox:
                         style_prefix "location_data"
 
-                        text "Current time in the world"
-                        text time
+                        text "Current state of the world" xalign 0.0
+                        text "Day: [persistent.current_day]" xalign 0.0
+                        text "Time: [time]" xalign 0.0
+                        text "Weather: [persistent.current_weather[0]]" xalign 0.0
+
 
                         hbox:
                             textbutton "<":
@@ -473,7 +476,7 @@ screen display_locations:
             fixed:
                 imagebutton:
                     idle all_locations[idx].get_background(persistent.world_time)
-                    action [Function(charge_label, all_locations[idx].name), Start("charge_location")]
+                    action [Function(init_weather), Function(charge_label, all_locations[idx].name), Start("charge_location")]
                     at customzoom
                     style "dl_button_image"
 
@@ -621,6 +624,7 @@ screen game_info():
             spacing 5
             text time size 20
             text "Location:\n[persistent.location]" size 20
+            text "Weather:\n[persistent.current_weather[0]]" size 20
             text "Current tokens: [persistent.current_tokens]" size 20
 
 screen inputma():

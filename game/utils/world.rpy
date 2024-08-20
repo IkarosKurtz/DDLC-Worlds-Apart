@@ -167,15 +167,15 @@ init -999 python:
 
   
   class WorldParser:
-    def __init__(self, path: str) -> None:
-      self._path = path
+    def __init__(self) -> None:
+      self._path = os.path.join(renpy.config.gamedir, "schema.json")
+
       self._types = {
         "T": Town,
         "B": Building,
         "R": Room,
         "GC": GenericConnection
       }
-
     def _get_class(self, type: str):
       if type in self._types:
         return self._types[type]
@@ -230,3 +230,69 @@ init -999 python:
 
         town.add_sub_locations(wrapper(value))
         return town
+
+  class WorldWeather:
+    def __init__(self) -> None:
+      self.weather = {
+          'Sunny': {'temperature': (25, 35), 'humidity': (10, 30), 'wind': (0, 10), 'clouds': (0, 20)},
+          'Cloudy': {'temperature': (15, 25), 'humidity': (40, 60), 'wind': (5, 15), 'clouds': (60, 100)},
+          'Rainy': {'temperature': (10, 20), 'humidity': (70, 90), 'wind': (10, 20), 'clouds': (80, 100)},
+          'Stormy': {'temperature': (8, 18), 'humidity': (80, 100), 'wind': (20, 40), 'clouds': (90, 100)},
+          'Snowy': {'temperature': (-5, 5), 'humidity': (60, 80), 'wind': (5, 15), 'clouds': (70, 100)}
+      }
+
+    def _interpolate(self, initial_value: float, final_value: float, step: int, max_steps: int) -> float:
+      return initial_value + (final_value - initial_value) * (step / max_steps)
+
+    def _generate_weather(self, weather) -> None:
+      conditions = self.weather[weather]
+      temperature = random.uniform(*conditions['temperature'])
+      humidity = random.uniform(*conditions['humidity'])
+      wind = random.uniform(*conditions['wind'])
+      clouds = random.uniform(*conditions['clouds'])
+      return {'weather': weather, 'temperature': temperature, 'humidity': humidity, 'wind': wind, 'clouds': clouds}
+
+    def transition_weather(self, initial_conditions: dict, final_conditions: dict, duration: str):
+      for hour in range(duration):
+        temperature = self._interpolate(
+            initial_conditions['temperature'], final_conditions['temperature'], hour, duration)
+        humidity = self._interpolate(
+            initial_conditions['humidity'], final_conditions['humidity'], hour, duration)
+        wind = self._interpolate(
+            initial_conditions['wind'], final_conditions['wind'], hour, duration)
+        clouds = self._interpolate(
+            initial_conditions['clouds'], final_conditions['clouds'], hour, duration)
+        print(
+            f"Hour {hour}: Weather: {final_conditions['weather']}, Temperature: {temperature:.2f}°C, Humidity: {humidity:.2f}%, Wind: {wind:.2f} km/h, Clouds: {clouds:.2f}%")
+
+        yield {
+            'weather': final_conditions['weather'],
+            'data': {
+              'temperature': temperature,
+              'humidity': humidity,
+              'wind': wind,
+              'clouds': clouds
+            }
+        }
+
+    def simulate_weather_with_transitions(self, total_duration_hours: int, last_weather: str = 'Sunny') -> Generator[str, None, None]:
+      current_conditions = self._generate_weather(last_weather)
+      remaining_hours = total_duration_hours
+
+      while remaining_hours > 0:
+        # Define the duration of the next transition
+        transition_duration = random.randint(60, 240)  # Example transition from 1 to 4 hours (60 to 240 minutes)
+
+        # Choose the next weather
+        new_weather = random.choice(list(self.weather.keys()))
+        final_conditions = self._generate_weather(new_weather)
+
+        # Perform the transition
+        transition_gen = self.transition_weather(current_conditions, final_conditions, transition_duration)
+
+        for transition in transition_gen:
+          yield transition
+
+        # Update for the next transition
+        current_conditions = final_conditions
+        remaining_hours -= transition_duration

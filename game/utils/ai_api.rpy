@@ -2,12 +2,6 @@ init -999 python:
   import requests
   import math
   import random
-
-  headers = headers = {
-    "Authorization": f"Bearer {key}",
-    "Content-Type": "application/json"
-  }
-
    
   def chat_completion(prompt: str, ai_role: str = 'You are a helpful assistant.', temperature: float = 0) -> tuple[str, str]:
     response = requests.post(
@@ -40,12 +34,6 @@ init -999 python:
 
 
   def get_embedding(text: str, engine: str = 'text-embedding-ada-002') -> list[float]:
-    data = {
-      "input": text,
-      "model": engine,
-      "encoding_format": "float"
-    }
-
     response = requests.post(
       "http://localhost:11434/api/embeddings",
       json={
