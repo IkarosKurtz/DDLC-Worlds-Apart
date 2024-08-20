@@ -1,33 +1,26 @@
 init -1 python:
-  mystore.generator = None
+  global weather_steps
 
   def init_weather():
+    global weather_steps
+    
     time = day_duration - persistent.world_time[0]
     print(f'Time to weather: {time} = {day_duration} - {persistent.world_time[0]}')
 
-    global generator
-    generator = weather.simulate_weather_with_transitions(time, persistent.current_weather[0])
+    weather_steps = weather.simulate_weather_with_transitions(time, persistent.current_weather[0])
 
   def update_time():
-    global generator
-
+    global weather_steps
+    
     if persistent.world_time[1] + game_seconds >= 60:
       persistent.world_time[1] = 0
       persistent.world_time[0] += 1
 
-      if generator is None:
+      if len(persistent.weather_steps) == 0:
         init_weather()
 
-      try:
-        new_weather = next(generator)
-
-      except StopIteration:
-        init_weather()
-      except Exception as e:
-        init_weather()
-        print(e)
-      finally:
-        new_weather = next(generator)
+      new_weather = weather_steps.pop(0)
+      print(f'New weather: {new_weather}')
 
       if new_weather['weather'] != persistent.current_weather[0]:
         persistent.current_weather[0] = new_weather['weather']
@@ -37,8 +30,6 @@ init -1 python:
       persistent.world_time[0] = 0
 
       persistent.current_day += 1
-
-      
 
     persistent.world_time[1] += game_seconds
 

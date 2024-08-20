@@ -27,10 +27,7 @@ define game_seconds = 2 # Each 1.5 seconds in real time is 2 minutes in game tim
 default persistent.world_time = [12, 0, 0]
 default persistent.current_day = 1
 define day_duration = 24
-
-init python in mystore:
-    _contant = True
-    generator = None
+default weather_steps = []
 
 default 1 message = ""
 default selected_char = ""

@@ -554,9 +554,9 @@ style data_window:
     background None
     yalign 0
     xalign 0
-    ypos 165
+    ypos 200
     xsize 250
-    ysize config.screen_height - 215
+    ysize config.screen_height - 300
 
 style data_vbox:
     xalign .5
