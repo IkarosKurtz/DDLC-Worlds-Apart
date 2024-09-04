@@ -30,13 +30,7 @@
         }
       },
       "C-Right Corridor": {
-        "day": "bg right_corridor",
-        "R-Man Bathroom": {
-          "day": "bg man_bathroom"
-        },
-        "R-Woman Bathroom": {
-          "day": "bg woman_bathroom"
-        }
+        "day": "bg right_corridor"
       }
     }
   },

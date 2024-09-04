@@ -210,41 +210,6 @@ style input:
     xmaximum gui.text_width
     text_align 0.5
 
-init -999 python:
-    def llm_online():
-        try:
-            __response = chat_completion("You are online??", "You can only say yes or no")
-            return True
-        except:
-            return False
-
-    def embedding_online():
-        try:
-            __response = get_embedding("You are online??")
-            return True
-        except:
-            return False
-
-    def get_time(string: bool = True):
-        if string:
-            return f"{persistent.world_time[0]:02}: {persistent.world_time[1]:02}"
-
-        return persistent.world_time
-
-    def get_two_decimals(value):
-        return f"{value:.2f}"
-
-    def get_dokis_head(location):
-        if location not in characters_in_location:
-            return []
-
-        return [character_heads[c.lower()] for c in characters_in_location[location]]
-
-    def get_characters_locations():
-        return nexis.get_characters()
-
-    def update_state(**props):
-        RPC.update(**props)
 
 # MARK: Mod Screens
 ################################################################
@@ -306,15 +271,28 @@ screen custom_navigation():
             textbutton "World" action [
                 Function(update_state, state="Selecting location"),
                 If(persistent.playername,
-                true=ShowMenu('display_locations'),
-                false=Show(screen="name_input",
-                            message="Please enter your name",
-                            ok_action=Function(FinishEnterName)))
+                    true=ShowMenu('display_locations'),
+                    false=Show(screen="name_input",
+                                message="Please enter your name",
+                                ok_action=Function(FinishEnterName)))
                 ]
 
-            textbutton "Options" action [Function(update_state, state="Viewing Options"), If(persistent.playername, true=ShowMenu('preferences'),  false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))]
+            textbutton "Options" action [
+                Function(update_state, state="Viewing Options"),
+                If(persistent.playername,
+                    true=ShowMenu('preferences'), 
+                    false=Show(screen="name_input",
+                                message="Please enter your name",
+                                ok_action=Function(FinishEnterName)))
+                ]
 
-            textbutton "About" action [If(persistent.playername, true=NullAction(),  false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))]
+            textbutton "About" action [
+                If(persistent.playername,
+                    true=NullAction(),
+                    false=Show(screen="name_input",
+                                message="Please enter your name",
+                                ok_action=Function(FinishEnterName)))
+                ]
         
         hbox:
             textbutton "Exit" action Quit()

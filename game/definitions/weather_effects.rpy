@@ -1,3 +1,5 @@
+# Rain Effect
+
 image small_raindrop:
   subpixel True
   "mod_assets/effects/rain/raindrop.png"
@@ -37,13 +39,12 @@ screen stormy:
   add "eff_rain"
   add "eff_rain"
 
+# Snow Effect
+
 image snow_particle:
   subpixel True
   "mod_assets/effects/snowflake/snowflake.png"
   zoom .35
-
-  
-
 
 image eff_snow:
   truecenter
@@ -57,3 +58,13 @@ image eff_snow:
 
 screen snow:
   add "eff_snow"
+
+# Thunder Effect
+
+image thunder:
+  # A white background
+  '#fff'
+
+  alpha .8
+
+  linear 1.0 alpha 0.0

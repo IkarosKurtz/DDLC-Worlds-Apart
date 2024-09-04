@@ -8,25 +8,28 @@ define persistent.demo = False
 
 # This variable declares whether the mod is in the 'steamapps' folder.
 define persistent.steam = ("steamapps" in config.basedir.lower())
-
-# This variable declares whether Developer Mode is on or off in the mod.
 define config.developer = False
-default monika_agent = None
+
+# MARK: Mod definitions
+define override_pre_load = True
 define persistent.location = None
 define persistent.temperature = 0.2
 define persistent.current_tokens = 0
 define persistent.seed = 0
-define override_pre_load = True
-
-define parser = WorldParser()
-define nexis = parser.unpack()
-default current_place = None
-define weather = WorldWeather()
 define persistent.current_weather = ["Sunny", None]
-define game_seconds = 10 # Each 1.5 seconds in real time is 2 minutes in game time
 define persistent.world_time = [12, 0]
 define persistent.current_day = 1
+
+default monika_agent = None
+default current_place = None
+define parser = WorldParser()
+define weather = WorldWeather()
+define nexis = parser.unpack()
+define game_seconds = 10 # Each 1.5 seconds in real time is 2 minutes in game time
 define day_duration = 24
+define weather_period_transition = (2, 4) # Hours
+
+
 default weather_steps = []
 default idx = 0
 
@@ -39,17 +42,34 @@ define 1 characters = {
     'yuri': y
 }
 
-image bg class_room_day = "mod_assets/bg/class_room_day.jpg"
-image bg class_room_afternoon = "mod_assets/bg/class_room_afternoon.jpg"
-image bg main_entrance = "mod_assets/bg/main_entrance.jpg"
-image bg left_corridor = "mod_assets/bg/left_corridor.jpg"
-image bg right_corridor = "mod_assets/bg/right_corridor.jpg"
-image bg man_bathroom = "mod_assets/bg/man_bathroom.jpg"
-image bg woman_bathroom = "mod_assets/bg/woman_bathroom.jpg"
+define character_heads = {
+    'monika': "monika_head",
+    'sayori': "sayori_head",
+    'natsuki': "natsuki_head",
+    'yuri': "yuri_head"
+}
 
+# All the images used in the mod
+
+# School BG's
 image bg school = "mod_assets/bg/school/school.jpg"
 image bg school_night = "mod_assets/bg/school/school_night.jpg"
 image bg school_afternoon = "mod_assets/bg/school/school_rain.jpg"
+
+# Main Entrance BG's
+image bg main_entrance = "mod_assets/bg/main_entrance.jpg"
+
+# Club Room BG's
+
+# Class Room BG's
+image bg class_room_day = "mod_assets/bg/class_room_day.jpg"
+image bg class_room_afternoon = "mod_assets/bg/class_room_afternoon.jpg"
+
+# Left Corridor BG's
+image bg left_corridor = "mod_assets/bg/left_corridor.jpg"
+
+# Right Corridor BG's
+image bg right_corridor = "mod_assets/bg/right_corridor.jpg"
 
 image monika_head:
     'mod_assets/heads/monika.png'
@@ -67,16 +87,10 @@ image yuri_head:
     'mod_assets/heads/yuri.png'
     zoom 0.35
 
-define character_heads = {
-    'monika': "monika_head",
-    'sayori': "sayori_head",
-    'natsuki': "natsuki_head",
-    'yuri': "yuri_head"
-}
-
-define soft_rain_sound = "mod_assets/sfx/rain/soft_rain.mp3"
-define hard_rain_sound = "mod_assets/sfx/rain/hard_rain.mp3"
-define indor_rain_sound = "mod_assets/sfx/rain/indoor_rain.mp3"
+# Sounds 
+define rain_sound.soft_rain = "mod_assets/sfx/rain/soft_rain.mp3"
+define rain_sound.soft_indoor_rain = "mod_assets/sfx/rain/indoor_rain.mp3"
+define rain_sound.hard_rain = "mod_assets/sfx/rain/hard_rain.mp3"
 
 init python:
     import random
@@ -161,7 +175,7 @@ init python:
 
     # These variable declarations adjusts the mapping for certain actions in-game.
     config.keymap['game_menu'].remove('mouseup_3')
-    config.keymap['hide_windows'].append('mouseup_3')
+    # config.keymap['hide_windows'].append('mouseup_3')
     config.keymap['self_voicing'] = []
     config.keymap['clipboard_voicing'] = []
     config.keymap['toggle_skip'] = []
