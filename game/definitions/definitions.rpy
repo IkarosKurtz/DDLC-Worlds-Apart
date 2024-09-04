@@ -12,22 +12,23 @@ define persistent.steam = ("steamapps" in config.basedir.lower())
 # This variable declares whether Developer Mode is on or off in the mod.
 define config.developer = False
 default monika_agent = None
-default persistent.location = None
-default persistent.temperature = 0.2
-default persistent.current_tokens = 0
+define persistent.location = None
+define persistent.temperature = 0.2
+define persistent.current_tokens = 0
 define persistent.seed = 0
-default executor = None
+define override_pre_load = True
 
 define parser = WorldParser()
 define nexis = parser.unpack()
 default current_place = None
 define weather = WorldWeather()
-default persistent.current_weather = ["Sunny", None]
-define game_seconds = 2 # Each 1.5 seconds in real time is 2 minutes in game time
-default persistent.world_time = [12, 0, 0]
-default persistent.current_day = 1
+define persistent.current_weather = ["Sunny", None]
+define game_seconds = 10 # Each 1.5 seconds in real time is 2 minutes in game time
+define persistent.world_time = [12, 0]
+define persistent.current_day = 1
 define day_duration = 24
 default weather_steps = []
+default idx = 0
 
 default 1 message = ""
 default selected_char = ""
@@ -41,11 +42,14 @@ define 1 characters = {
 image bg class_room_day = "mod_assets/bg/class_room_day.jpg"
 image bg class_room_afternoon = "mod_assets/bg/class_room_afternoon.jpg"
 image bg main_entrance = "mod_assets/bg/main_entrance.jpg"
-image bg school = "mod_assets/bg/school.jpg"
 image bg left_corridor = "mod_assets/bg/left_corridor.jpg"
 image bg right_corridor = "mod_assets/bg/right_corridor.jpg"
 image bg man_bathroom = "mod_assets/bg/man_bathroom.jpg"
 image bg woman_bathroom = "mod_assets/bg/woman_bathroom.jpg"
+
+image bg school = "mod_assets/bg/school/school.jpg"
+image bg school_night = "mod_assets/bg/school/school_night.jpg"
+image bg school_afternoon = "mod_assets/bg/school/school_rain.jpg"
 
 image monika_head:
     'mod_assets/heads/monika.png'
@@ -70,21 +74,34 @@ define character_heads = {
     'yuri': "yuri_head"
 }
 
+define soft_rain_sound = "mod_assets/sfx/rain/soft_rain.mp3"
+define hard_rain_sound = "mod_assets/sfx/rain/hard_rain.mp3"
+define indor_rain_sound = "mod_assets/sfx/rain/indoor_rain.mp3"
+
 init python:
     import random
     from concurrent.futures import ThreadPoolExecutor
-    
-    print("Initializing executor")
+
+    # This block of code initializes some variables, this variables can't be declared with define or default, because
+    # they need to be loaded before the mod starts, and they aren't saved in the save file (for obvious reasons).
+
+    if not override_pre_load:
+        llm_model_online = llm_online()
+        embedding_model_online = embedding_online()
+
+    renpy.music.register_channel("weather_music", mixer="weather", tight=True)
+
+    if persistent.location is not None:
+        current_place = nexis.get_location_by_name(persistent.location)
+
+    print("\n\n\nInitializing executor")
     executor = ThreadPoolExecutor(max_workers = 25)
+
     persistent.seed = random.randint(0, 10000)
 
-    cr = nexis.get_location('Club Room')
+    cr = nexis.get_location_by_name('Club Room')
     cr.add_character('Monika')
-    cr.add_character('Sayori')
-    cr.add_character('Natsuki')
-    cr.add_character('Yuri')
-    
-
+    characters_in_location = get_characters_locations()
 
     # if monika_agent is None:
     #     monika_agent = Agent('Monika', monika['bio'], monika['abilities'], monika['memories'], monika['traits'])

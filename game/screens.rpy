@@ -156,92 +156,12 @@ style frame:
 ################################################################################
 
 
-## Say screen ##################################################################
-##
-## The say screen is used to display dialogue to the player. It takes two
-## parameters, who and what, which are the name of the speaking character and
-## the text to be displayed, respectively. (The who parameter can be None if no
-## name is given.)
-##
-## This screen must create a text displayable with id "what", as Ren'Py uses
-## this to manage text display. It can also create displayables with id "who"
-## and id "window" to apply style properties.
-##
-## https://www.renpy.org/doc/html/screen_special.html#say
-
-screen say(who, what):
-    style_prefix "say"
-
-    window:
-        id "window"
-
-        text what id "what"
-
-        if who is not None:
-
-            window:
-                style "namebox"
-                text who id "who"
-
-    # If there's a side image, display it above the text. Do not display
-    # on the phone variant - there's no room.
-    if not renpy.variant("small"):
-        add SideImage() xalign 0.0 yalign 1.0
-
-    # use quick_menu
-
-
-style window is default
-style say_label is default
-style say_dialogue is default
-style say_thought is say_dialogue
-
-style namebox is default
-style namebox_label is say_label
-
-
-style window:
-    # xalign 0.5
-    # xfill True
-    # yalign gui.textbox_yalign
-    # ysize gui.textbox_height
-
-    background Transform("gui/textbox.png", xalign=0.5, yalign=1.0)
-
-style namebox:
-    xpos gui.name_xpos
-    xanchor gui.name_xalign
-    xsize gui.namebox_width
-    ypos gui.name_ypos
-    ysize gui.namebox_height
-
-    background Frame("gui/namebox.png", gui.namebox_borders, tile=gui.namebox_tile, xalign=gui.name_xalign)
-    padding gui.namebox_borders.padding
-
-style say_label:
-    color gui.accent_color
-    font gui.name_font
-    size gui.name_text_size
-    xalign gui.name_xalign
-    yalign 0.5
-    # outlines [(3, text_outline_color, 0, 0), (1, text_outline_color, 1, 1)]
-    #outlines [(3, "#b59", 0, 0), (1, "#b59", 1, 1)]
-
-style say_dialogue:
-    xpos gui.text_xpos
-    xanchor gui.text_xalign
-    xsize gui.text_width
-    ypos gui.text_ypos
-
-    text_align gui.text_xalign
-    layout ("subtitle" if gui.text_xalign else "tex")
-
 image ctc:
-    xalign 0.81 yalign 0.98 xoffset -5 alpha 0.0 subpixel True
+    xalign 0.75 yalign 0.98 alpha 0.0 subpixel True
     "gui/ctc.png"
     block:
-        easeout 0.75 alpha 1.0 xoffset 0
-        easein 0.75 alpha 0.5 xoffset -5
+        easeout 0.75 alpha 1.0 
+        easein 0.75 alpha 0.5
         repeat
 
 ################################################################
@@ -290,6 +210,42 @@ style input:
     xmaximum gui.text_width
     text_align 0.5
 
+init -999 python:
+    def llm_online():
+        try:
+            __response = chat_completion("You are online??", "You can only say yes or no")
+            return True
+        except:
+            return False
+
+    def embedding_online():
+        try:
+            __response = get_embedding("You are online??")
+            return True
+        except:
+            return False
+
+    def get_time(string: bool = True):
+        if string:
+            return f"{persistent.world_time[0]:02}: {persistent.world_time[1]:02}"
+
+        return persistent.world_time
+
+    def get_two_decimals(value):
+        return f"{value:.2f}"
+
+    def get_dokis_head(location):
+        if location not in characters_in_location:
+            return []
+
+        return [character_heads[c.lower()] for c in characters_in_location[location]]
+
+    def get_characters_locations():
+        return nexis.get_characters()
+
+    def update_state(**props):
+        RPC.update(**props)
+
 # MARK: Mod Screens
 ################################################################
 ## Main Menu Screen
@@ -297,6 +253,35 @@ style input:
 ##
 ## Used to display the new main menu
 ##
+
+
+screen say(who, what):
+    style_prefix "response"
+
+    window:
+        id "window"
+        yalign 0.99
+        xalign 0.5
+        xsize 700
+        ysize 200
+        xfill True
+        padding (10, 10)
+
+        background Frame("gui/frame.png", gui.frame_borders, tile=gui.frame_tile)
+
+        text what id "what" xpos 100 ypos 0 xmaximum 550
+
+        if who is not None:
+            text who id "who" xpos 0 ypos 0
+
+screen dokis_heads(location):
+    $ heads = get_dokis_head(location)
+
+    grid 2 2:
+        if len(heads) > 0:
+            for ch in heads:
+                add ch
+
 
 # Set location based on the selected location
 init python:
@@ -309,112 +294,135 @@ screen main_menu():
     add "menu_bg"
     add "menu_logo"
 
-    use navigation2
+    use custom_navigation
 
-screen navigation2():
-    style_prefix "nav"
+screen custom_navigation():
+    style_prefix "custom_navigation"
 
     $ RPC.update(state="Thinking")
 
     vbox:
         hbox:
-            textbutton "World" action [If(persistent.playername, true=ShowMenu('display_locations'),  false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))]
-            textbutton "Options" action [If(persistent.playername, true=ShowMenu('preferences'),  false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))]
+            textbutton "World" action [
+                Function(update_state, state="Selecting location"),
+                If(persistent.playername,
+                true=ShowMenu('display_locations'),
+                false=Show(screen="name_input",
+                            message="Please enter your name",
+                            ok_action=Function(FinishEnterName)))
+                ]
+
+            textbutton "Options" action [Function(update_state, state="Viewing Options"), If(persistent.playername, true=ShowMenu('preferences'),  false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))]
+
             textbutton "About" action [If(persistent.playername, true=NullAction(),  false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))]
         
         hbox:
             textbutton "Exit" action Quit()
 
-style nav_vbox:
+style disclaimer_text is gui_text:
+    size 20
+
+style custom_navigation_vbox:
     xalign 0.5
 
-style nav_hbox:
+style custom_navigation_hbox:
     xalign 0.5
     ypos gui.mid_height + 20
     spacing 10
 
-style nav_button is button_sounds:
+style custom_navigation_button is button_sounds:
     background None
     
 
-style nav_button_text is navigation_button_text:
+style custom_navigation_button_text is navigation_button_text:
     size 40
 
-screen preferences():
+screen preferences(goto_main_menu = False):
     tag menu
     add "game_menu_bg"
     style_prefix "preferences"
 
     python:
-        RPC.update(state="Viewing Options")
-
         status = "Connected" if RPC.rpc_connected else "Disconnected"
         if not persistent.enable_discord:
             status = "Disabled"
 
-    vbox:
-        align (0.5, 0.5)
-        xsize 500
+    hbox:
+        hbox:
+            transclude
 
         vbox:
             align (0.5, 0.5)
+            xsize 250
 
-            text "Discord RPC"
-            text "[status]"
-            
-            if not renpy.android:
-                textbutton "Toggle" action [
-                    ToggleField(persistent, "enable_discord"), 
-                    If(persistent.enable_discord,
-                        Function(RPC.close),
-                        Function(RPC.connect, reset=True))
-                ]
+            vbox:
+                align (0.5, 0.5)
 
-                if persistent.enable_discord and not RPC.rpc_connected:
-                    textbutton _("Reconnect") action Function(RPC.connect, reset=True)
-
-        null height 35
-
-        if config.has_music:
-            hbox:
-                label _("Music Volume")
+                text "Discord RPC"
+                text "[status]"
                 
-                null width 5
-            
-                text str(round(preferences.get_volume("music") * 100)) style "value_text"
+                if not renpy.android:
+                    textbutton "Toggle" action [
+                        ToggleField(persistent, "enable_discord"), 
+                        If(persistent.enable_discord,
+                            Function(RPC.close),
+                            Function(RPC.connect, reset=True))
+                    ]
 
-            hbox:
-                bar value Preference("music volume")
+                    if persistent.enable_discord and not RPC.rpc_connected:
+                        textbutton _("Reconnect") action Function(RPC.connect, reset=True)
 
-        if config.has_sound:
+            null height 35
 
-            hbox:
-                label _("Sound Volume")
+            if config.has_music:
+                hbox:
+                    label _("Music Volume")
+                    
+                    null width 5
                 
-                null width 5
+                    text str(round(preferences.get_volume("music") * 100)) style "value_text"
+
+                hbox:
+                    bar value Preference("music volume")
+
+            if config.has_sound:
+                hbox:
+                    label _("Sound Volume")
+                    
+                    null width 5
+                
+                    text str(round(preferences.get_volume("sfx") * 100)) style "value_text"
+
+                hbox:
+                    bar value Preference("sound volume")
+
+                    if config.sample_sound:
+                        textbutton _("Test") action Play("sound", config.sample_sound)
             
-                text str(round(preferences.get_volume("sfx") * 100)) style "value_text"
+            hbox:
+                label "Weather Volume"
+                null width 5
+
+                text str(round(preferences.get_volume("weather") * 100))
+                style "value_text"
 
             hbox:
-                bar value Preference("sound volume")
-
-                if config.sample_sound:
-                    textbutton _("Test") action Play("sound", config.sample_sound)
-        hbox:
-            textbutton "Return" action Return()
+                bar value Preference("weather volume")
+            
+            vbox:
+                textbutton "Return" action Return() xalign 0.5
+                if goto_main_menu:
+                    textbutton "Main Menu" action MainMenu(False, False) xalign 0.5
 
 style preferences_button is button_sounds
 style preferences_button_text is navigation_button_text
+style preferences_frame is empty
 
 style preferences_vbox:
     align (0.5, 0.5)
 
 style preferences_hbox:
     align (0.5, 0.5)
-
-
-default idx = 0
-default all_locations = parser.get_locations(nexis)
 
 transform customzoom:
     xzoom 0.78
@@ -426,20 +434,14 @@ transform customzoom:
     
 
 screen display_locations:
-    $ characters_in_location = nexis.get_characters()
-    $ time = f"{persistent.world_time[0]:02}: {persistent.world_time[1]:02}"
-
-    key "K_LEFT" action [SetVariable("idx", (idx - 1) % len(all_locations)), Play("sound", gui.activate_sound)]
-    key "K_RIGHT" action [SetVariable("idx", (idx + 1) % len(all_locations)),Play("sound", gui.activate_sound)]
+    key "K_LEFT" action [SetVariable("idx", (idx - 1) % len(nexis.all_locations)), Play("sound", gui.activate_sound)]
+    key "K_RIGHT" action [SetVariable("idx", (idx + 1) % len(nexis.all_locations)),Play("sound", gui.activate_sound)]
 
     tag menu
     style_prefix "dl"
 
     python:
-        RPC.update(state="Selecting location")
-        char_heads = []
-        if all_locations[idx].name in characters_in_location:
-            char_heads = [character_heads[c.lower()] for c in characters_in_location[all_locations[idx].name]]
+        time = get_time()
 
     window:
         hbox:
@@ -461,26 +463,23 @@ screen display_locations:
 
                         hbox:
                             textbutton "<":
-                                action SetVariable("idx", (idx - 1) % len(all_locations))
+                                action SetVariable("idx", (idx - 1) % len(nexis.all_locations))
                             textbutton ">":
-                                action SetVariable("idx", (idx + 1) % len(all_locations))
+                                action SetVariable("idx", (idx + 1) % len(nexis.all_locations))
 
-                        text "Characters in this location"
-                        grid 2 2:
-                            if len(char_heads) > 0:
-                                for ch in char_heads:
-                                    add ch
+                        text "Dokis in this location"
+                        use dokis_heads(nexis.all_locations[idx].name)
                 
                     textbutton "Back" action Return() align (0.5, 1.0)
 
             fixed:
                 imagebutton:
-                    idle all_locations[idx].get_background(persistent.world_time)
-                    action [Function(init_weather), Function(charge_label, all_locations[idx].name), Start("charge_location")]
+                    idle nexis.all_locations[idx].get_background(persistent.world_time)
+                    action [Function(init_weather), Function(charge_label, nexis.all_locations[idx].name), Start("charge_location")]
                     at customzoom
                     style "dl_button_image"
 
-                text all_locations[idx].name:
+                text nexis.all_locations[idx].name:
                     xalign 0.5
                     size 35
 
@@ -513,6 +512,38 @@ style arrow_button_text:
     size 100
     xalign 0.5    
 
+screen save():
+    style_prefix "preferences"
+    
+    tag menu
+    $ current_weahter_data = persistent.current_weather[1]
+    $ clouds_cover = current_weahter_data['clouds']
+    $ temp = current_weahter_data['temperature']
+
+    $ temperature = get_two_decimals(temp)
+    $ clouds = get_two_decimals(clouds_cover)
+    $ time = get_time()
+
+    use preferences(True):
+        vbox:
+            spacing 35
+            hbox:
+                spacing 25
+                vbox:
+                    yalign 0.0
+                    text "Temperature: [temperature]°C"
+                    text "Weather: [persistent.current_weather[0]]"
+                    text "Clouds: [clouds]%"
+                vbox:
+                    yalign 0.0
+                    text "Location: [persistent.location]"
+                    text "Time: [time]" 
+            hbox:
+                xalign 0.0
+                spacing 25
+                vbox:
+                    text "Dokis in this location"
+                    use dokis_heads(persistent.location)
 
 ################################################################
 ## Data Screen
@@ -611,9 +642,11 @@ transform slideLeft(time=.4):
         linear time/1.6 alpha 1.0
 
 screen game_info():
+    zorder 10
     timer 1.5 action update_time repeat True
+    timer 0.4 action set_weather_effect repeat True
 
-    $ time = f"Time: {persistent.world_time[0]:02}: {persistent.world_time[1]:02}"
+    $ time = get_time()
 
     frame at slideLeft:
         yalign 0.025
@@ -621,11 +654,24 @@ screen game_info():
         padding (10, 10)
 
         vbox at appear:
+            xfill True
             spacing 5
-            text time size 20
-            text "Location:\n[persistent.location]" size 20
-            text "Weather:\n[persistent.current_weather[0]]" size 20
-            text "Current tokens: [persistent.current_tokens]" size 20
+
+            hbox:
+                xfill True
+                spacing 5
+                
+                text "Time:\n[time]" size 20 xalign 0.0
+                text "Location:\n[persistent.location]" size 20 xalign 0.0
+
+            null height 5
+
+            hbox:
+                xfill True
+                spacing 5
+
+                text "Weather:\n[persistent.current_weather[0]]" size 20 xalign 0.0
+                text "Current tokens:\n[persistent.current_tokens]" size 20 xalign 0.0
 
 screen inputma():
     style_prefix "sss"
@@ -793,7 +839,7 @@ screen navigation():
 
             elif not main_menu:
                 if persistent.playthrough != 3:
-                    textbutton _("Main Menu") action MainMenu()
+                    textbutton _("Main Men3") action MainMenu()
                 else:
                     textbutton _("Main Menu") action NullAction()
 
@@ -1140,18 +1186,12 @@ style hyperlink_text:
 ## https://www.renpy.org/doc/html/screen_special.html#save
 ## https://www.renpy.org/doc/html/screen_special.html#load
 
-screen save():
-
-    tag menu
-
-    use file_slots(_("Save"))
 
 
 screen load():
 
     tag menu
 
-    use file_slots(_("Load"))
 
 init python:
     def FileActionMod(name, page=None, **kwargs):

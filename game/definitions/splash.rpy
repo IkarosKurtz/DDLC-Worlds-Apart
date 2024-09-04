@@ -278,198 +278,191 @@ default persistent.first_run = False
 ## This sets the lockdown check variable to False to show the warning for developers.
 default persistent.lockdown_warning = False
 
-
-
 ## Startup Disclaimer
 ## This label calls the disclaimer screen that appears when the game starts.
 label splashscreen:
-    pass
+    ## This python statement grabs the username and process list of the PC.
+    python:
+        process_list = []
+        currentuser = ""
 
-# label sdsd:
-#     ## This python statement grabs the username and process list of the PC.
-#     python:
-#         process_list = []
-#         currentuser = ""
-
-#         if renpy.windows:
-#             try: process_list = subprocess.run("wmic process get Description", check=True, shell=True, stdout=subprocess.PIPE).stdout.lower().decode("utf-8").replace("\r", "").replace(" ", "").strip().split("\n")
-#             except subprocess.CalledProcessError:
-#                 try:
-#                     process_list = subprocess.run("powershell (Get-Process).ProcessName", check=True, shell=True, stdout=subprocess.PIPE).stdout.lower().decode("utf-8").replace("\r", "").strip().split("\n") # For W10/11 builds > 22000
+        if renpy.windows:
+            try: process_list = subprocess.run("wmic process get Description", check=True, shell=True, stdout=subprocess.PIPE).stdout.lower().decode("utf-8").replace("\r", "").replace(" ", "").strip().split("\n")
+            except subprocess.CalledProcessError:
+                try:
+                    process_list = subprocess.run("powershell (Get-Process).ProcessName", check=True, shell=True, stdout=subprocess.PIPE).stdout.lower().decode("utf-8").replace("\r", "").strip().split("\n") # For W10/11 builds > 22000
                     
-#                     for i, x in enumerate(process_list):
-#                         process_list[i] = x + ".exe"
-#                 except: 
-#                     pass            
-#         else:
-#             try: process_list = subprocess.run("ps -A --format cmd", check=True, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8").strip().split("\n") # Linux
-#             except subprocess.CalledProcessError: process_list = subprocess.run("ps -A -o command", check=True, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8").strip().split("\n") # MacOS
+                    for i, x in enumerate(process_list):
+                        process_list[i] = x + ".exe"
+                except: 
+                    pass            
+        else:
+            try: process_list = subprocess.run("ps -A --format cmd", check=True, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8").strip().split("\n") # Linux
+            except subprocess.CalledProcessError: process_list = subprocess.run("ps -A -o command", check=True, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8").strip().split("\n") # MacOS
                 
-#             process_list.pop(0)
+            process_list.pop(0)
 
-#         for name in ('LOGNAME', 'USER', 'LNAME', 'USERNAME'):
-#             user = os.environ.get(name)
-#             if user:
-#                 currentuser = user
+        for name in ('LOGNAME', 'USER', 'LNAME', 'USERNAME'):
+            user = os.environ.get(name)
+            if user:
+                currentuser = user
 
-#     ## This if statement checks if we have passed the disclaimer and that the
-#     ## current version of the mod equals the old one or the autoload is set to 
-#     ## the post-credit loop.
-#     if persistent.first_run and (config.version == persistent.oldversion or persistent.autoload == "postcredits_loop"):
-#         $ quick_menu = False
-#         scene black
+    ## This if statement checks if we have passed the disclaimer and that the
+    ## current version of the mod equals the old one or the autoload is set to 
+    ## the post-credit loop.
+    if persistent.first_run and (config.version == persistent.oldversion or persistent.autoload == "postcredits_loop"):
+        $ quick_menu = False
+        scene black
 
-#         menu:
-#             "A previous save file has been found. Would you like to delete your save data and start over?"
-#             "Yes, delete my existing data.":
-#                 "Deleting save data...{nw}"
-#                 python:
-#                     delete_all_saves()
-#                     renpy.loadsave.location.unlink_persistent()
-#                     renpy.persistent.should_save_persistent = False
-#                     renpy.utter_restart()
-#             "No, continue where I left off.":
-#                 $ restore_relevant_characters()
+        menu:
+            "A previous save file has been found. Would you like to delete your save data and start over?"
+            "Yes, delete my existing data.":
+                "Deleting save data...{nw}"
+                python:
+                    delete_all_saves()
+                    renpy.loadsave.location.unlink_persistent()
+                    renpy.persistent.should_save_persistent = False
+                    renpy.utter_restart()
+            "No, continue where I left off.":
+                $ restore_relevant_characters()
 
-#     if not persistent.lockdown_warning:
-#         if config.developer:
-#             call lockdown_check from _call_lockdown_check
-#         else:
-#             $ persistent.lockdown_warning = True
+    if not persistent.lockdown_warning:
+        if config.developer:
+            call lockdown_check
+        else:
+            $ persistent.lockdown_warning = True
 
-#     if not persistent.first_run:
-#         $ quick_menu = False
-#         scene white
-#         pause 0.5
-#         scene tos
-#         with Dissolve(1.0)
-#         pause 1.0
+    if not persistent.first_run:
+        $ quick_menu = False
+        scene white
+        pause 0.5
+        scene tos
+        with Dissolve(1.0)
+        pause 1.0
 
-#         ## Switch to language selector. Borrowed from Ren'Py
-#         if not persistent.has_chosen_language and translations:
+        ## Switch to language selector. Borrowed from Ren'Py
+        if not persistent.has_chosen_language and translations:
 
-#             if _preferences.language is None:
-#                 call choose_language from _call_choose_language
+            if _preferences.language is None:
+                call choose_language
         
-#         $ persistent.has_chosen_language = True
+        $ persistent.has_chosen_language = True
 
-#         ## You can edit this message but you MUST declare that your mod is 
-#         ## unaffiliated with Team Salvato, requires that the player must 
-#         ## finish DDLC before playing, has spoilers for DDLC, and where to 
-#         ## get DDLC's files."
-#         "[config.name] is a Doki Doki Literature Club fan mod that is not affiliated in anyway with Team Salvato."
-#         "It is designed to be played only after the official game has been completed, and contains spoilers for the official game."
-#         "Game files for Doki Doki Literature Club are required to play this mod and can be downloaded for free at: https://ddlc.moe or on Steam."
+        ## You can edit this message but you MUST declare that your mod is 
+        ## unaffiliated with Team Salvato, requires that the player must 
+        ## finish DDLC before playing, has spoilers for DDLC, and where to 
+        ## get DDLC's files."
+        "[config.name] is a Doki Doki Literature Club fan mod that is not affiliated in anyway with Team Salvato."
+        "It is designed to be played only after the official game has been completed, and contains spoilers for the official game."
+        "Game files for Doki Doki Literature Club are required to play this mod and can be downloaded for free at: https://ddlc.moe or on Steam."
 
-#         menu:
-#             "By playing [config.name] you agree that you have completed Doki Doki Literature Club and accept any spoilers contained within."
-#             "I agree.":
-#                 pass
+        "By playing [config.name] you agree that you have completed Doki Doki Literature Club and accept any spoilers contained within."
 
-#         $ persistent.first_run = True
-#         scene tos2
-#         with Dissolve(1.5)
-#         pause 1.0
+        $ persistent.first_run = True
+        scene tos2
+        with Dissolve(1.5)
+        pause 1.0
 
-#         ## This if statement checks if we are running any common streaming/recording 
-#         ## software so the game can enable Let's Play Mode automatically and notify
-#         ## the user about it if extra settings are enabled.
-#         if extra_settings:
-#             if process_check(["obs32.exe", "obs64.exe", "obs.exe", "xsplit.core.exe", "livehime.exe", "pandatool.exe", "yymixer.exe", "douyutool.exe", "huomaotool.exe"]):
-#                 $ persistent.lets_play = True
-#                 call screen dialog("Let's Play Mode has been enabled automatically.\nThis mode allows you to skip content that\ncontains sensitive information or apply alternative\nstory options.\n\nThis setting will be dependent on the modder\nif they programmed these checks in their story.\n\n To turn off Let's Play Mode, visit Settings and\nuncheck Let's Play Mode.", 
-#                     [Hide("dialog"), Return()])
-#         scene white
+        ## This if statement checks if we are running any common streaming/recording 
+        ## software so the game can enable Let's Play Mode automatically and notify
+        ## the user about it if extra settings are enabled.
+        if extra_settings:
+            if process_check(["obs32.exe", "obs64.exe", "obs.exe", "xsplit.core.exe", "livehime.exe", "pandatool.exe", "yymixer.exe", "douyutool.exe", "huomaotool.exe"]):
+                $ persistent.lets_play = True
+                call screen dialog("Let's Play Mode has been enabled automatically.\nThis mode allows you to skip content that\ncontains sensitive information or apply alternative\nstory options.\n\nThis setting will be dependent on the modder\nif they programmed these checks in their story.\n\n To turn off Let's Play Mode, visit Settings and\nuncheck Let's Play Mode.", 
+                    [Hide("dialog"), Return()])
+        scene white
 
-#     ## This python statement controls whether the Sayori Kill Early screen shows 
-#     ## in-game. This feature has been commented out for mod safety reasons but can 
-#     ## be used if needed.
-#     # python:
-#     #     s_kill_early = None
-#     #     if persistent.playthrough == 0:
-#     #         try: renpy.file("../characters/sayori.chr")
-#     #         except IOError: s_kill_early = True
-#     #     if not s_kill_early:
-#     #         if persistent.playthrough <= 2 and persistent.playthrough != 0:
-#     #             try: renpy.file("../characters/monika.chr")
-#     #             except IOError: open(config.basedir + "/characters/monika.chr", "wb").write(renpy.file("monika.chr").read())
-#     #         if persistent.playthrough <= 1 or persistent.playthrough == 4:
-#     #             try: renpy.file("../characters/natsuki.chr")
-#     #             except IOError: open(config.basedir + "/characters/natsuki.chr", "wb").write(renpy.file("natsuki.chr").read())
-#     #             try: renpy.file("../characters/yuri.chr")
-#     #             except IOError: open(config.basedir + "/characters/yuri.chr", "wb").write(renpy.file("yuri.chr").read())
-#     #         if persistent.playthrough == 4:
-#     #             try: renpy.file("../characters/sayori.chr")
-#     #             except IOError: open(config.basedir + "/characters/sayori.chr", "wb").write(renpy.file("sayori.chr").read())
+    ## This python statement controls whether the Sayori Kill Early screen shows 
+    ## in-game. This feature has been commented out for mod safety reasons but can 
+    ## be used if needed.
+    # python:
+    #     s_kill_early = None
+    #     if persistent.playthrough == 0:
+    #         try: renpy.file("../characters/sayori.chr")
+    #         except IOError: s_kill_early = True
+    #     if not s_kill_early:
+    #         if persistent.playthrough <= 2 and persistent.playthrough != 0:
+    #             try: renpy.file("../characters/monika.chr")
+    #             except IOError: open(config.basedir + "/characters/monika.chr", "wb").write(renpy.file("monika.chr").read())
+    #         if persistent.playthrough <= 1 or persistent.playthrough == 4:
+    #             try: renpy.file("../characters/natsuki.chr")
+    #             except IOError: open(config.basedir + "/characters/natsuki.chr", "wb").write(renpy.file("natsuki.chr").read())
+    #             try: renpy.file("../characters/yuri.chr")
+    #             except IOError: open(config.basedir + "/characters/yuri.chr", "wb").write(renpy.file("yuri.chr").read())
+    #         if persistent.playthrough == 4:
+    #             try: renpy.file("../characters/sayori.chr")
+    #             except IOError: open(config.basedir + "/characters/sayori.chr", "wb").write(renpy.file("sayori.chr").read())
 
-#     ## This if statement controls which special poems are shown to the player in-game.
-#     if not persistent.special_poems:
-#         python hide:
-#             # This variable sets a array of zeroes to assign poem numbers.
-#             persistent.special_poems = [0,0,0]
+    ## This if statement controls which special poems are shown to the player in-game.
+    if not persistent.special_poems:
+        python hide:
+            # This variable sets a array of zeroes to assign poem numbers.
+            persistent.special_poems = [0,0,0]
             
-#             # This sets the range of poem numbers to pick from.
-#             a = list(range(1,12))
+            # This sets the range of poem numbers to pick from.
+            a = list(range(1,12))
 
-#             # This for loop loops 3 times (array number of special_poems) and
-#             # assigns a random number to the array.
-#             for i in range(3):
-#                 b = renpy.random.choice(a)
-#                 persistent.special_poems[i] = b
-#                 # This line makes sure we remove the number chosen from the range
-#                 # list to avoid duplicates.
-#                 a.remove(b)
+            # This for loop loops 3 times (array number of special_poems) and
+            # assigns a random number to the array.
+            for i in range(3):
+                b = renpy.random.choice(a)
+                persistent.special_poems[i] = b
+                # This line makes sure we remove the number chosen from the range
+                # list to avoid duplicates.
+                a.remove(b)
 
-#     ## This variable makes sure the path of the base directory is Linux/macOS/Unix 
-#     ## based than Windows as Python/Ren'Py prefers this placement.
-#     $ basedir = config.basedir.replace('\\', '/')
+    ## This variable makes sure the path of the base directory is Linux/macOS/Unix 
+    ## based than Windows as Python/Ren'Py prefers this placement.
+    $ basedir = config.basedir.replace('\\', '/')
 
-#     ## This if statement checks whether we have a auto-load set to load it than
-#     ## start the game screen as-new.
-#     if persistent.autoload:
-#         jump autoload
+    ## This if statement checks whether we have a auto-load set to load it than
+    ## start the game screen as-new.
+    if persistent.autoload:
+        jump autoload
 
-#     ## This variable sets skipping to False for the splash screen.
-#     $ config.allow_skipping = False
+    ## This variable sets skipping to False for the splash screen.
+    $ config.allow_skipping = False
 
-#     ## This if statement checks if we are in Act 2, have not seen the ghost menu
-#     ## before and a random number is 0 from 0-63.
-#     if persistent.playthrough == 2 and not persistent.seen_ghost_menu and renpy.random.randint(0, 63) == 0:
-#         show black
-#         # These variables set the splash and menu screen to be a ghost menu.
-#         $ config.main_menu_music = audio.ghostmenu
-#         $ persistent.seen_ghost_menu = True
-#         $ persistent.ghost_menu = True
-#         $ renpy.music.play(config.main_menu_music)
-#         $ pause(1.0)
-#         show end with dissolve_cg
-#         $ pause(3.0)
-#         $ config.allow_skipping = True
-#         return
+    ## This if statement checks if we are in Act 2, have not seen the ghost menu
+    ## before and a random number is 0 from 0-63.
+    if persistent.playthrough == 2 and not persistent.seen_ghost_menu and renpy.random.randint(0, 63) == 0:
+        show black
+        # These variables set the splash and menu screen to be a ghost menu.
+        $ config.main_menu_music = audio.ghostmenu
+        $ persistent.seen_ghost_menu = True
+        $ persistent.ghost_menu = True
+        $ renpy.music.play(config.main_menu_music)
+        $ pause(1.0)
+        show end with dissolve_cg
+        $ pause(3.0)
+        $ config.allow_skipping = True
+        return
 
-#     show white
-#     $ persistent.ghost_menu = False
-#     $ splash_message = splash_message_default
-#     $ config.main_menu_music = audio.t1
-#     $ renpy.music.play(config.main_menu_music)
-#     show intro with Dissolve(0.5, alpha=True)
-#     $ pause(2.5)
-#     hide intro with Dissolve(0.5, alpha=True)
-#     if persistent.playthrough == 2 and renpy.random.randint(0, 3) == 0:
-#         $ splash_message = renpy.random.choice(splash_messages)
-#     show splash_warning "[splash_message]" with Dissolve(0.5, alpha=True)
-#     $ pause(1.5)
-#     hide splash_warning with Dissolve(0.5, alpha=True)
-#     $ pause(0.5)
-#     $ config.allow_skipping = True
-#     return
 
-# ## This label is a left-over from DDLC's development that hides the Team Salvato
-# ## logo and shows the splash message.
-# label warningscreen:
-#     hide intro
-#     show warning
-#     pause 3.0
+    show white
+    $ persistent.ghost_menu = False
+    $ splash_message = splash_message_default
+    $ config.main_menu_music = audio.t1
+    $ renpy.music.play(config.main_menu_music)
+    # show intro with Dissolve(0.5, alpha=True)
+    # $ pause(2.5)
+    # hide intro with Dissolve(0.5, alpha=True)
+    if persistent.playthrough == 2 and renpy.random.randint(0, 3) == 0:
+        $ splash_message = renpy.random.choice(splash_messages)
+    show splash_warning "[splash_message]" with Dissolve(0.5, alpha=True)
+    $ pause(1.5)
+    hide splash_warning with Dissolve(0.5, alpha=True)
+    $ pause(1.0)
+    $ config.allow_skipping = False
+    return
+
+## This label is a left-over from DDLC's development that hides the Team Salvato
+## logo and shows the splash message.
+label warningscreen:
+    hide intro
+    show warning
+    pause 3.0
 
 
 ## This label checks if the save loaded matches the anti-cheat stored in the save.
@@ -573,12 +566,6 @@ label autoload:
 #     else:
 #         $ persistent.yuri_kill = 200
 #     jump expression persistent.autoload
-
-## This label sets the main menu music to Doki Doki Literature Club before the
-## menu starts.
-label before_main_menu:
-    $ config.main_menu_music = audio.t1
-    return
 
 ## This label is a left-over from DDLC's development that quits the game but shows
 ## a close-up Monika face before doing so.

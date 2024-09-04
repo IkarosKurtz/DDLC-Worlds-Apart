@@ -205,4 +205,4 @@ Documentation
 DDLCModTemplate.xcodeproj
 characters
 *.json
-!schema.json
+!Nexis.json
