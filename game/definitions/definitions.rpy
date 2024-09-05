@@ -91,6 +91,9 @@ image yuri_head:
 define rain_sound.soft_rain = "mod_assets/sfx/rain/soft_rain.mp3"
 define rain_sound.soft_indoor_rain = "mod_assets/sfx/rain/indoor_rain.mp3"
 define rain_sound.hard_rain = "mod_assets/sfx/rain/hard_rain.mp3"
+define thunder_sound = "mod_assets/sfx/rain/thunder.mp3"
+
+define next_scene = Dissolve(0.5)
 
 init python:
     import random
@@ -104,6 +107,7 @@ init python:
         embedding_model_online = embedding_online()
 
     renpy.music.register_channel("weather_music", mixer="weather", tight=True)
+    renpy.music.register_channel("thunder_sounds", mixer="weather", tight=True)
 
     if persistent.location is not None:
         current_place = nexis.get_location_by_name(persistent.location)

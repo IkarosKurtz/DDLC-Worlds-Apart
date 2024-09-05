@@ -21,7 +21,7 @@ init -1 python:
 
     print(f'Playing {music}')
 
-    renpy.music.play(music, channel='weather_music', loop=True, relative_volume=volume)
+    renpy.music.play(music, channel='weather_music', loop=True, relative_volume=volume, fadeout=0.3)
 
   def set_weather_screen(screen):
     global active_effect
@@ -32,6 +32,7 @@ init -1 python:
     
     print(f'Showing {screen}')
     renpy.show_screen(screen)
+
     active_effect = screen
 
   def hide_weather_screen():
@@ -66,17 +67,17 @@ init -1 python:
       hide_weather_screen()
 
       if not is_some_weather:
-        renpy.music.stop('weather_music')
+        renpy.music.stop('weather_music', fadeout=1.0)
 
       previous_weather = weather
 
     if not is_some_weather and active_effect is not None:
-      renpy.music.stop('weather_music')
+      renpy.music.stop('weather_music', fadeout=1.0)
       return
 
     if is_snowing:
       set_weather_screen('snow')
-      renpy.music.stop('weather_music')
+      renpy.music.stop('weather_music', fadeout=1.0)
       return
 
     if is_raining and not current_place.is_indoor:
@@ -102,6 +103,16 @@ init -1 python:
 
     return bg
 
+  def handle_thunder():
+    if persistent.current_weather[0] == 'Stormy':
+      rand = renpy.random.random()
+
+      # 20% chance of thunder
+      if rand < 0.2:
+        renpy.sound.play(thunder_sound, channel='thunder_sounds', relative_volume=0.8)
+        if not current_place.is_indoor:
+          renpy.show('thunder')
+
   def update_time():
     global weather_steps
     global current_place
@@ -110,15 +121,16 @@ init -1 python:
     # if persistent.world_time[1] % 10 == 0:
     #   persistent.current_weather[0] = renpy.random.choice(['Rainy', 'Stormy', 'Snowy'])
 
-    rand = renpy.random.randint(0, 4)
-
-    if rand == 2:
-      print('thunder')
-      renpy.show('thunder')
+    # persistent.current_weather[0] = 'Stormy'
     
-    if persistent.world_time[1] + game_seconds >= 60:
+    if persistent.world_time[1] + game_seconds >= 70:
       persistent.world_time[1] = 0
       persistent.world_time[0] += 1
+
+      if persistent.world_time[0] + 1 >= 24:
+        persistent.world_time[0] = 0
+
+        persistent.current_day += 1
 
       if len(weather_steps) == 0:
         init_weather()
@@ -134,14 +146,16 @@ init -1 python:
         current_bg = bg
         renpy.scene()
         renpy.show(bg)
+
         renpy.call_in_new_context('do_transition')
 
-    if persistent.world_time[0] + 1 >= 24:
-      persistent.world_time[0] = 0
+      renpy.restart_interaction()
 
-      persistent.current_day += 1
+      return
 
     persistent.world_time[1] += game_seconds
+
+    handle_thunder()
 
     renpy.restart_interaction()
 
