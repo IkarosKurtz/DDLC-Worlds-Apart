@@ -44,12 +44,17 @@ init -997 python:
             raise ValueError(f"Missing day background for {key}")
 
           afternoon_bg = value.get('afternoon', day_bg)
-
           night_bg = value.get('night', day_bg)
+
+          rain_bg = value.get('rain', None)
+          snow_bg = value.get('snow', None)
+
 
           location_cls = self._get_class(location_type)
 
           location: BasicLocation = location_cls(location_name, day_bg, afternoon_bg, night_bg)
+
+          location.set_special_bg(rain_bg, snow_bg)
 
           world.loc_categories[location.type.value].append(location)
 

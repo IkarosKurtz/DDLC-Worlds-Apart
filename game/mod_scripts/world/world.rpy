@@ -19,9 +19,15 @@ init -997 python:
       self.day: str = day
       self.afternoon: str = afternoon if afternoon is not None else day
       self.night: str = night if night is not None else day
+      self.rain: str = None
+      self.snow: str = None
 
     def get_backgrounds(self) -> str:
       return (self.day, self.afternoon, self.night)
+
+    def set_special_bg(self, rain: str = None, snow: str = None):
+      self.rain = rain
+      self.snow = snow
 
     def get_background(self, time: tuple[int, int]) -> str:
       hour, minute = time
