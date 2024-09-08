@@ -264,7 +264,7 @@ screen main_menu():
 screen custom_navigation():
     style_prefix "custom_navigation"
 
-    $ RPC.update(state="Thinking")
+    $ update_state(state="Thinking")
 
     vbox:
         hbox:
@@ -498,6 +498,7 @@ screen save():
     $ current_weahter_data = persistent.current_weather[1]
     $ clouds_cover = current_weahter_data['clouds']
     $ temp = current_weahter_data['temperature']
+    $ update_state(state="Thinking", details="Simulation Paused")
 
     $ temperature = get_two_decimals(temp)
     $ clouds = get_two_decimals(clouds_cover)

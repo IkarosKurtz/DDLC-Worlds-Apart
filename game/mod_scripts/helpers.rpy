@@ -8,7 +8,7 @@ init -997 python:
 
     print(f'Playing {music}')
 
-    renpy.music.play(music, channel=channel, loop=True, relative_volume=volume)
+    renpy.music.play(music, channel=channel, loop=True, relative_volume=volume, fadein=0.5)
 
   def set_weather_screen(screen):
     global active_effect
