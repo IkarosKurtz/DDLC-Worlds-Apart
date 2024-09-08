@@ -107,16 +107,17 @@ image yuri_head:
     zoom 0.35
 
 # Sounds 
-define rain_sound.soft_rain = "mod_assets/sfx/rain/soft_rain.mp3"
-define rain_sound.soft_indoor_rain = "mod_assets/sfx/rain/soft_indoor_rain.mp3"
-define rain_sound.hard_rain = "mod_assets/sfx/rain/hard_rain.mp3"
-define rain_sound.hard_indoor_rain = "mod_assets/sfx/rain/hard_indoor_rain.mp3"
+define rain_sound.soft_rain = "<from 47.356 to 489.012>mod_assets/sfx/rain/soft_rain.mp3"
+define rain_sound.soft_indoor_rain = "<from 20.149 to 53.877>mod_assets/sfx/rain/soft_indoor_rain.mp3"
+define rain_sound.hard_rain = "<from 19.447 to 63.843>mod_assets/sfx/rain/hard_rain.mp3"
+define rain_sound.hard_indoor_rain = "<from 216.959 to 752.292>mod_assets/sfx/rain/hard_indoor_rain.mp3"
 define thunder_sound = "mod_assets/sfx/rain/thunder.mp3"
 
 # Music
-define music.rain_ambient = "mod_assets/music/rain/Andreas Theme.mp3"
-define music.snow_ambient = "mod_assets/music/winter/Winter In June.mp3"
-define music.normal_ambient = "mod_assets/music/Overcast.mp3"
+# define music.rain_ambient = "<from 33.391 to 182.716>mod_assets/music/rain/Andreas Theme.mp3" Alternative, less looped
+define music.rain_ambient = "<from 74.546 to 159.882>mod_assets/music/rain/Andreas Theme.mp3"
+define music.snow_ambient = "<from 23.094 to 111.094>mod_assets/music/winter/Winter In June.mp3"
+define music.normal_ambient = "<from 38.661 to 166.661>mod_assets/music/Overcast.mp3"
 
 # Transitions
 define rain = ImageDissolve("mod_assets/transitions/rain.jpg", .45, 3)
@@ -155,7 +156,8 @@ init python:
     active_effect = None
     previous_weather = None
     current_bg = None
-
+    
+    # Remeber month is n - 1, because it starts from 0
     persistent.current_date = [1, 8, 2024] # Day, month, year
 
 
