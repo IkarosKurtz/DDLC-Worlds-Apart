@@ -1,4 +1,18 @@
 init python:
+  def llm_online():
+    try:
+      __response = chat_completion("You are online??", "You can only say yes or no")
+      return True
+    except:
+      return False
+
+  def embedding_online():
+    try:
+      __response = get_embedding("You are online??")
+      return True
+    except:
+        return False
+
   def check_ai():
     global llm_model_online
     global embedding_model_online
@@ -7,7 +21,7 @@ init python:
     embedding_model_online = embedding_online()
 
 label before_main_menu:
-  $ config.main_menu_music = audio.t1
+  # $ config.main_menu_music = audio.t1
   if override_pre_load:
     return
 

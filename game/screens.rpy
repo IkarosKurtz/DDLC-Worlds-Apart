@@ -412,14 +412,15 @@ transform customzoom:
     
 
 screen display_locations:
-    key "K_LEFT" action [SetVariable("idx", (idx - 1) % len(nexis.all_locations)), Play("sound", gui.activate_sound)]
-    key "K_RIGHT" action [SetVariable("idx", (idx + 1) % len(nexis.all_locations)),Play("sound", gui.activate_sound)]
+    key "K_LEFT" action [SetVariable("idx", (idx - 1) % len(world.all_locations)), Play("sound", gui.activate_sound)]
+    key "K_RIGHT" action [SetVariable("idx", (idx + 1) % len(world.all_locations)),Play("sound", gui.activate_sound)]
 
     tag menu
     style_prefix "dl"
 
     python:
         time = get_time()
+        date = get_date(True)
 
     window:
         hbox:
@@ -434,30 +435,30 @@ screen display_locations:
                         style_prefix "location_data"
 
                         text "Current state of the world" xalign 0.0
-                        text "Day: [persistent.current_day]" xalign 0.0
+                        text "Day: [date]" xalign 0.0
                         text "Time: [time]" xalign 0.0
                         text "Weather: [persistent.current_weather[0]]" xalign 0.0
 
 
                         hbox:
                             textbutton "<":
-                                action SetVariable("idx", (idx - 1) % len(nexis.all_locations))
+                                action SetVariable("idx", (idx - 1) % len(world.all_locations))
                             textbutton ">":
-                                action SetVariable("idx", (idx + 1) % len(nexis.all_locations))
+                                action SetVariable("idx", (idx + 1) % len(world.all_locations))
 
                         text "Dokis in this location"
-                        use dokis_heads(nexis.all_locations[idx].name)
+                        use dokis_heads(world.all_locations[idx].name)
                 
                     textbutton "Back" action Return() align (0.5, 1.0)
 
             fixed:
                 imagebutton:
-                    idle nexis.all_locations[idx].get_background(persistent.world_time)
-                    action [Function(init_weather), Function(charge_label, nexis.all_locations[idx].name), Start("charge_location")]
+                    idle world.all_locations[idx].get_background(persistent.world_time)
+                    action [Function(init_weather), Function(charge_label, world.all_locations[idx].name), Start("charge_location")]
                     at customzoom
                     style "dl_button_image"
 
-                text nexis.all_locations[idx].name:
+                text world.all_locations[idx].name:
                     xalign 0.5
                     size 35
 
@@ -501,6 +502,7 @@ screen save():
     $ temperature = get_two_decimals(temp)
     $ clouds = get_two_decimals(clouds_cover)
     $ time = get_time()
+    $ date = get_date(True)
 
     use preferences(True):
         vbox:
@@ -516,6 +518,7 @@ screen save():
                     yalign 0.0
                     text "Location: [persistent.location]"
                     text "Time: [time]" 
+                    text "Date: [date]"
             hbox:
                 xalign 0.0
                 spacing 25
@@ -552,7 +555,7 @@ screen location_info(characters, rooms, parent_location):
                     text "Locations in this area" size 18
 
                     grid columns 5:
-                        if parent_location is not None and nexis.name != parent_location.name:
+                        if parent_location is not None and world.name != parent_location.name:
                             textbutton 'Back' action [SetVariable('persistent.location', parent_location.name), Return()]
 
                         for place in rooms:
@@ -621,10 +624,11 @@ transform slideLeft(time=.4):
 
 screen game_info():
     zorder 10
-    timer 1.5 action update_time repeat True
-    timer 0.4 action set_weather_effect repeat True
+    timer 1.5 action Function(update_time) repeat True
+    timer 0.4 action Function(set_weather_effect) repeat True
 
     $ time = get_time()
+    $ date = get_date()
 
     frame at slideLeft:
         yalign 0.025
@@ -639,8 +643,8 @@ screen game_info():
                 xfill True
                 spacing 5
                 
+                text "Day:\n[date]" size 20 xalign 0.0
                 text "Time:\n[time]" size 20 xalign 0.0
-                text "Location:\n[persistent.location]" size 20 xalign 0.0
 
             null height 5
 
@@ -649,7 +653,7 @@ screen game_info():
                 spacing 5
 
                 text "Weather:\n[persistent.current_weather[0]]" size 20 xalign 0.0
-                text "Current tokens:\n[persistent.current_tokens]" size 20 xalign 0.0
+                text "Location:\n[persistent.location]" size 20 xalign 0.0
 
 screen inputma():
     style_prefix "sss"

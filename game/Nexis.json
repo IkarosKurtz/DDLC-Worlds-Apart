@@ -8,25 +8,26 @@
     "night": "bg school_night",
     "R-Main Entrance": {
       "day": "bg main_entrance",
+      "afternoon": "bg main_entrance_afternoon",
+      "night": "bg main_entrance_night",
       "C-Left Corridor": {
         "day": "bg left_corridor",
+        "afternoon": "bg left_corridor_afternoon",
+        "night": "bg left_corridor_night",
         "R-Club Room": {
-          "day": "bg club_day",
-          "afternoon": "bg club_afternoon",
-          "R-Closet A": {
-            "day": "bg closet"
-          }
+          "day": "bg club_room",
+          "afternoon": "bg club_room_afternoon",
+          "night": "bg club_room_night"
         },
         "R-Classroom 2": {
-          "day": "bg class_room_day",
+          "day": "bg class_room",
           "afternoon": "bg class_room_afternoon",
-          "R-Closet": {
-            "day": "bg closet"
-          }
+          "night": "bg class_room_night"
         },
         "R-Classroom 3": {
-          "day": "bg class_room_day",
-          "afternoon": "bg class_room_afternoon"
+          "day": "bg class_room",
+          "afternoon": "bg class_room_afternoon",
+          "night": "bg class_room_night"
         }
       },
       "C-Right Corridor": {
@@ -38,6 +39,8 @@
     "to": [
       "B-School"
     ],
-    "day": "bg residential_day"
+    "day": "bg residential",
+    "afternoon": "bg residential_afternoon",
+    "night": "bg residential_night"
   }
 }

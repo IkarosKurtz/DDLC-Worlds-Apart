@@ -197,6 +197,7 @@ log.txt
 errors.txt
 traceback.txt
 files.txt
+credits.txt
 
 logs/*
 */agents_data/*

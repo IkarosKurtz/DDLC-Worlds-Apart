@@ -13,25 +13,27 @@ define config.developer = False
 # MARK: Mod definitions
 define override_pre_load = True
 define persistent.location = None
-define persistent.temperature = 0.2
 define persistent.current_tokens = 0
-define persistent.seed = 0
 define persistent.current_weather = ["Sunny", None]
 define persistent.world_time = [12, 0]
-define persistent.current_day = 1
+define persistent.current_date = [1, 8, 2024] # Day, month, year
+default in_loop = False
 
-default monika_agent = None
 default current_place = None
-define parser = WorldParser()
-define weather = WorldWeather()
-define nexis = parser.unpack()
+define parse = WorldParser()
+define world = parse.unpack()
+define world_weather = WorldWeather()
+define event_emitter = EventEmitter()
+
+# This values affects the world
 define game_seconds = 10 # Each 1.5 seconds in real time is 2 minutes in game time
 define day_duration = 24
-define weather_period_transition = (2, 4) # Hours
+define weather_period_transition = (2, 4) # Hours between weather transitions
+define thunder_chance = 0.125
 
 
 default weather_steps = []
-default idx = 0
+default idx = 0 # Used in select location screen
 
 default 1 message = ""
 default selected_char = ""
@@ -54,23 +56,40 @@ define character_heads = {
 # School BG's
 image bg school = "mod_assets/bg/school/school.jpg"
 image bg school_night = "mod_assets/bg/school/school_night.jpg"
-image bg school_afternoon = "mod_assets/bg/school/school_rain.jpg"
+image bg school_afternoon = "mod_assets/bg/school/school_afternoon.jpg"
+image bg school_rain = "mod_assets/bg/school/school_rain.jpg"
 
 # Main Entrance BG's
-image bg main_entrance = "mod_assets/bg/main_entrance.jpg"
+image bg main_entrance = "mod_assets/bg/main_entrance/main_entrance.jpg"
+image bg main_entrance_afternoon = "mod_assets/bg/main_entrance/main_entrance_afternoon.jpg"
+image bg main_entrance_night = "mod_assets/bg/main_entrance/main_entrance_night.jpg"
+
+
+# Residential BG's
+image bg residential = "bg/residential.png"
+image bg residential_afternoon = "mod_assets/bg/residential/residential_afternoon.png"
+image bg residential_night = "mod_assets/bg/residential/residential_night.png"
 
 # Club Room BG's
+image bg club_room = "bg/club.png"
+image bg club_room_afternoon = "mod_assets/bg/club_room/club_room_afternoon.png"
+image bg club_room_night = "mod_assets/bg/club_room/club_room_night.jpg"
 
 # Class Room BG's
-image bg class_room_day = "mod_assets/bg/class_room_day.jpg"
-image bg class_room_afternoon = "mod_assets/bg/class_room_afternoon.jpg"
+image bg class_room = "mod_assets/bg/class_room/class_room.jpg"
+image bg class_room_afternoon = "mod_assets/bg/class_room/class_room_afternoon.png"
+image bg class_room_night = "mod_assets/bg/class_room/class_room_night.jpg"
 
 # Left Corridor BG's
-image bg left_corridor = "mod_assets/bg/left_corridor.jpg"
+image bg left_corridor = "bg/corridor.png" # The hallway BG
+image bg left_corridor_afternoon = "mod_assets/bg/left_corridor/left_corridor_afternoon.jpg"
+image bg left_corridor_night = "mod_assets/bg/left_corridor/left_corridor_night.png"
+
 
 # Right Corridor BG's
-image bg right_corridor = "mod_assets/bg/right_corridor.jpg"
+image bg right_corridor = "mod_assets/bg/right_corridor/right_corridor.jpg"
 
+# Head images for characters
 image monika_head:
     'mod_assets/heads/monika.png'
     zoom 0.35
@@ -89,15 +108,23 @@ image yuri_head:
 
 # Sounds 
 define rain_sound.soft_rain = "mod_assets/sfx/rain/soft_rain.mp3"
-define rain_sound.soft_indoor_rain = "mod_assets/sfx/rain/indoor_rain.mp3"
+define rain_sound.soft_indoor_rain = "mod_assets/sfx/rain/soft_indoor_rain.mp3"
 define rain_sound.hard_rain = "mod_assets/sfx/rain/hard_rain.mp3"
+define rain_sound.hard_indoor_rain = "mod_assets/sfx/rain/hard_indoor_rain.mp3"
 define thunder_sound = "mod_assets/sfx/rain/thunder.mp3"
 
-define next_scene = Dissolve(0.5)
+# Music
+define music.rain_ambient = "mod_assets/music/rain/Andreas Theme.mp3"
+define music.snow_ambient = "mod_assets/music/winter/Winter In June.mp3"
+define music.normal_ambient = "mod_assets/music/Overcast.mp3"
+
+# Transitions
+define rain = ImageDissolve("mod_assets/transitions/rain.jpg", .45, 3)
 
 init python:
     import random
     from concurrent.futures import ThreadPoolExecutor
+    import threading
 
     # This block of code initializes some variables, this variables can't be declared with define or default, because
     # they need to be loaded before the mod starts, and they aren't saved in the save file (for obvious reasons).
@@ -106,25 +133,36 @@ init python:
         llm_model_online = llm_online()
         embedding_model_online = embedding_online()
 
+    # Register specific channels for the music and sound effects
     renpy.music.register_channel("weather_music", mixer="weather", tight=True)
     renpy.music.register_channel("thunder_sounds", mixer="weather", tight=True)
 
     if persistent.location is not None:
-        current_place = nexis.get_location_by_name(persistent.location)
+        current_place = world.get_location_by_name(persistent.location)
 
     print("\n\n\nInitializing executor")
     executor = ThreadPoolExecutor(max_workers = 25)
 
-    persistent.seed = random.randint(0, 10000)
+    characters_in_location = world.get_characters()
 
-    cr = nexis.get_location_by_name('Club Room')
-    cr.add_character('Monika')
-    characters_in_location = get_characters_locations()
+    # Events for the mod
+    # Yeah maybe this method is bad but is for better readability
+    event_emitter.on('bg', change_background)
+    event_emitter.on('weather', set_weather)
+    event_emitter.on('thunder', handle_thunder)
+
+    # Some variables that
+    active_effect = None
+    previous_weather = None
+    current_bg = None
+
+    persistent.current_date = [1, 8, 2024] # Day, month, year
+
 
     # if monika_agent is None:
-    #     monika_agent = Agent('Monika', monika['bio'], monika['abilities'], monika['memories'], monika['traits'])
+    # monika_agent = Agent('Monika', monika['bio'], monika['abilities'], monika['memories'], monika['traits'])
 
-    # nexis.get_location(monika_agent.agent_details.location).add_character(monika_agent.agent_details.name)
+    # world.get_location(monika_agent.agent_details.location).add_character(monika_agent.agent_details.name)
 
 
 # This python statement starts singleton to make sure only one copy of the mod
@@ -327,11 +365,7 @@ image end:
 
 define fadeIn = Fade(0, 0 , 0.5)
 
-image bg residential_day = "bg/residential.png" # Start of DDLC BG
 image bg class_day = "bg/class.png" # The classroom BG
-image bg corridor = "bg/corridor.png" # The hallway BG
-image bg club_day = "bg/club.png" # The club BG
-image bg club_afternoon = "mod_assets/bg/club_afternoon.png" # The club BG
 image bg club_day2: # Glitched Club BG
     choice:
         "bg club_day"

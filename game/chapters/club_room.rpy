@@ -6,7 +6,7 @@ label charge_location:
 
     # To avoid of getting the same location twice
     if current_place is None or current_place.name != persistent.location:
-      current_place = nexis.get_location_by_name(persistent.location)
+      current_place = world.get_location_by_name(persistent.location)
 
     if current_place is not None and len(current_place.characters) > 0:
       update_state(state="Dokis: " + ', '.join(current_place.characters))
@@ -15,6 +15,7 @@ label charge_location:
 
   # Show the background of the current location, it supports day, afternoon and night
   scene expression set_bg_manually() with fadeIn
+  play music set_music_manually()
 
   show screen game_info
   call screen location_info(current_place.characters, current_place.sub_locations_here(), current_place.parent_location)
