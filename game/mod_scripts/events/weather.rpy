@@ -9,6 +9,7 @@ init -998 python:
 
   def set_weather():
     global weather_steps
+    global previous_weather
 
     if len(weather_steps) == 0:
         init_weather()
@@ -17,8 +18,10 @@ init -998 python:
     print(f'New weather: {new_weather["weather"]}')
 
     if new_weather['weather'] != persistent.current_weather[0]:
+      previous_weather = persistent.current_weather[0]
       persistent.current_weather[0] = new_weather['weather']
       persistent.current_weather[1] = new_weather['data']
+
 
   def set_weather_effect():
     global current_place

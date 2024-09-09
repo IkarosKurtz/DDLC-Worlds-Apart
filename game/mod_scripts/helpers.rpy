@@ -44,6 +44,7 @@ init -997 python:
     return bg
 
   def set_music_manually():
+    global previous_weather
     weather = persistent.current_weather[0]
     current_music = renpy.music.get_playing('music')
 
