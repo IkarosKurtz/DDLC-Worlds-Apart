@@ -5,8 +5,6 @@ label do_bg_transition:
   return
 
 init -998 python:
-  import threading
-
   def change_background():
     global current_bg
     

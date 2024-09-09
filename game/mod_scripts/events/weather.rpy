@@ -14,7 +14,7 @@ init -998 python:
         init_weather()
 
     new_weather = weather_steps.pop(0)
-    print(f'New weather: {new_weather}')
+    print(f'New weather: {new_weather["weather"]}')
 
     if new_weather['weather'] != persistent.current_weather[0]:
       persistent.current_weather[0] = new_weather['weather']

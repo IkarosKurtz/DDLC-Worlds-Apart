@@ -3,7 +3,7 @@ init -999 python:
     global weather_steps
     global current_place
     global current_bg
-
+    
     # persistent.current_weather[0] = 'Stormy'
     
     if persistent.world_time[1] + game_seconds >= 60:
