@@ -56,7 +56,7 @@ init -997 python:
     elif weather == 'Snowy':
       set_weather_music(music.snow_ambient, channel='music')
     else:
-      set_weather_music(music.normal_ambient, channel='music')
+      set_weather_music(music.normal_ambient, channel='music', volume=1.3)
     
 
   def get_time(string: bool = True):
