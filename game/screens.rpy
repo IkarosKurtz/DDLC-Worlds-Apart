@@ -625,7 +625,7 @@ transform slideLeft(time=.4):
 
 screen game_info():
     zorder 10
-    timer 1.5 action Function(update_time) repeat True
+    timer interval_seconds action Function(update_time) repeat True
     timer 0.4 action Function(set_weather_effect) repeat True
 
     $ time = get_time()

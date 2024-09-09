@@ -16,6 +16,7 @@ define persistent.location = None
 define persistent.current_tokens = 0
 define persistent.current_weather = ["Sunny", None]
 define persistent.world_time = [12, 0]
+# Remeber month is n - 1, because it starts from 0
 define persistent.current_date = [1, 8, 2024] # Day, month, year
 default in_loop = False
 
@@ -26,11 +27,11 @@ define world_weather = WorldWeather()
 define event_emitter = EventEmitter()
 
 # This values affects the world
-define game_seconds = 10 # Each 1.5 seconds in real time is 2 minutes in game time
+define interval_seconds = 1.5 # This means that every 1.5 seconds in real time
+define game_seconds = 2 # Is 2 minutes in game time
 define day_duration = 24
-define weather_period_transition = (2, 4) # Hours between weather transitions
+define weather_period_transition = (3, 6) # Hours between weather transitions
 define thunder_chance = 0.125
-
 
 default weather_steps = []
 default idx = 0 # Used in select location screen
@@ -156,10 +157,6 @@ init python:
     active_effect = None
     previous_weather = None
     current_bg = None
-    
-    # Remeber month is n - 1, because it starts from 0
-    persistent.current_date = [1, 8, 2024] # Day, month, year
-
 
     # if monika_agent is None:
     # monika_agent = Agent('Monika', monika['bio'], monika['abilities'], monika['memories'], monika['traits'])
